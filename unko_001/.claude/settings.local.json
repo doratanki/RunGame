@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -v grep echo --- lsof -i :9001 -i :9002)"
+    ]
+  }
+}
