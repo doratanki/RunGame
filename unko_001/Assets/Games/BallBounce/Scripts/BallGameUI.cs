@@ -65,4 +65,9 @@ public class BallGameUI : MonoBehaviour
     {
         BallGameManager.Instance?.RestartGame();
     }
+
+    public void OnBackToTitleButton()
+    {
+        BallGameManager.Instance?.BackToTitle();
+    }
 }

@@ -80,4 +80,9 @@ public class CrowdGameManager : MonoBehaviour
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
+
+    public void BackToTitle()
+    {
+        SceneManager.LoadScene("GameSelect");
+    }
 }

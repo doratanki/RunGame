@@ -65,4 +65,9 @@ public class TowerUI : MonoBehaviour
     {
         TowerGameManager.Instance?.RestartGame();
     }
+
+    public void OnBackToTitleButton()
+    {
+        TowerGameManager.Instance?.BackToTitle();
+    }
 }

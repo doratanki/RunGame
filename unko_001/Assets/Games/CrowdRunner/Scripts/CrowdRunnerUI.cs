@@ -69,4 +69,9 @@ public class CrowdRunnerUI : MonoBehaviour
     {
         CrowdGameManager.Instance?.RestartGame();
     }
+
+    public void OnBackToTitleButton()
+    {
+        CrowdGameManager.Instance?.BackToTitle();
+    }
 }
