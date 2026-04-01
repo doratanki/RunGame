@@ -137,13 +137,13 @@ public class BlockSpawner : MonoBehaviour
     /// <summary>
     /// TowerBlock.Slice() 完了後に呼ばれる。
     /// </summary>
-    public void OnBlockPlaced(TowerBlock block)
+    public void OnBlockPlaced(TowerBlock block, bool isPerfect = false)
     {
         lastPlacedBlock = block;
         topBlockTransform = block.transform;
         nextBlockY += blockHeight;
 
-        TowerGameManager.Instance?.OnBlockStacked();
+        TowerGameManager.Instance?.OnBlockStacked(isPerfect);
 
         SpawnNextBlock();
     }

@@ -87,6 +87,8 @@ public class TowerBlock : MonoBehaviour
         Slice();
     }
 
+    private const float PerfectThreshold = 0.1f;
+
     void Slice()
     {
         float prevLeft  = previousBlock.transform.position.x - previousBlock.transform.localScale.x / 2f;
@@ -107,29 +109,44 @@ public class TowerBlock : MonoBehaviour
             return;
         }
 
-        // はみ出た部分をデブリとして落下
-        float leftDiff  = overlapLeft  - currLeft;
-        float rightDiff = currRight - overlapRight;
+        // パーフェクト判定: はみ出し量が閾値以下
+        float trimAmount = previousBlock.transform.localScale.x - overlapWidth;
+        bool isPerfect = trimAmount < PerfectThreshold;
 
-        if (leftDiff > 0.01f)
+        if (isPerfect)
         {
-            float debrisX = currLeft + leftDiff / 2f;
-            SpawnDebris(debrisX, leftDiff);
+            // ブロック幅を維持し、前ブロック中心にスナップ
+            transform.position = new Vector3(
+                previousBlock.transform.position.x,
+                transform.position.y,
+                transform.position.z);
         }
-        if (rightDiff > 0.01f)
+        else
         {
-            float debrisX = overlapRight + rightDiff / 2f;
-            SpawnDebris(debrisX, rightDiff);
+            // はみ出た部分をデブリとして落下
+            float leftDiff  = overlapLeft  - currLeft;
+            float rightDiff = currRight - overlapRight;
+
+            if (leftDiff > 0.01f)
+            {
+                float debrisX = currLeft + leftDiff / 2f;
+                SpawnDebris(debrisX, leftDiff);
+            }
+            if (rightDiff > 0.01f)
+            {
+                float debrisX = overlapRight + rightDiff / 2f;
+                SpawnDebris(debrisX, rightDiff);
+            }
+
+            // 現ブロックを overlap 幅に切り詰め
+            float newCenterX = (overlapLeft + overlapRight) / 2f;
+            Vector3 scale = transform.localScale;
+            scale.x = overlapWidth;
+            transform.localScale = scale;
+            transform.position = new Vector3(newCenterX, transform.position.y, transform.position.z);
         }
 
-        // 現ブロックを overlap 幅に切り詰め
-        float newCenterX = (overlapLeft + overlapRight) / 2f;
-        Vector3 scale = transform.localScale;
-        scale.x = overlapWidth;
-        transform.localScale = scale;
-        transform.position = new Vector3(newCenterX, transform.position.y, transform.position.z);
-
-        spawner.OnBlockPlaced(this);
+        spawner.OnBlockPlaced(this, isPerfect);
     }
 
     void SpawnDebris(float centerX, float width)

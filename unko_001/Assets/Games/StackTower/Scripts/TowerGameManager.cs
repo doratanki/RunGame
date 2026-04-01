@@ -17,6 +17,7 @@ public class TowerGameManager : MonoBehaviour
     public GameState State { get; private set; } = GameState.Menu;
 
     public int Score { get; private set; } = 0;
+    public int ComboCount { get; private set; } = 0;
 
     private const string BestScoreKey = "StackTower_BestScore";
 
@@ -37,6 +38,7 @@ public class TowerGameManager : MonoBehaviour
     public void StartGame()
     {
         Score = 0;
+        ComboCount = 0;
         State = GameState.Playing;
 
         towerUI?.ShowGame(Score);
@@ -47,12 +49,20 @@ public class TowerGameManager : MonoBehaviour
             cameraFollow.target = blockSpawner.topBlockTransform;
     }
 
-    public void OnBlockStacked()
+    public void OnBlockStacked(bool isPerfect = false)
     {
         if (State != GameState.Playing) return;
 
-        Score++;
+        if (isPerfect)
+            ComboCount++;
+        else
+            ComboCount = 0;
+
+        int bonus = isPerfect ? Mathf.Min(ComboCount, 5) : 0;
+        Score += 1 + bonus;
+
         towerUI?.UpdateScore(Score);
+        towerUI?.UpdateCombo(ComboCount, isPerfect);
 
         // カメラターゲットを最新ブロックに更新
         if (cameraFollow != null && blockSpawner != null)
@@ -64,6 +74,8 @@ public class TowerGameManager : MonoBehaviour
         if (State != GameState.Playing) return;
         State = GameState.GameOver;
 
+        ComboCount = 0;
+        towerUI?.UpdateCombo(0, false);
         blockSpawner?.StopSpawning();
 
         int best = PlayerPrefs.GetInt(BestScoreKey, 0);
