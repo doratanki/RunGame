@@ -331,7 +331,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -490,7 +490,7 @@ Canvas:
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
   m_UseReflectionProbes: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
@@ -2215,11 +2215,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BlockSpawner
   blockWidth: 3
-  blockHeight: 0.4
+  blockHeight: 0.8
   blockDepth: 3
   moveRange: 3
   baseSpeed: 2.5
   speedIncrement: 0.1
+  meatPrefab: {fileID: 7718836575668033175, guid: 8d6742ef94a6b48a6bd8e4b9411886ef, type: 3}
   blockColors:
   - {r: 0.95, g: 0.35, b: 0.35, a: 1}
   - {r: 0.35, g: 0.75, b: 0.95, a: 1}
@@ -2566,7 +2567,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2

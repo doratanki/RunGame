@@ -16,6 +16,9 @@ public class BlockSpawner : MonoBehaviour
     public float baseSpeed      = 2.5f;
     public float speedIncrement = 0.1f;  // スコアごとの加速量
 
+    [Header("肉モデル（設定するとCubeの代わりに使用）")]
+    public GameObject meatPrefab;
+
     [Header("カラーパレット（Inspector で設定）")]
     public Color[] blockColors = new Color[]
     {
@@ -77,6 +80,7 @@ public class BlockSpawner : MonoBehaviour
 
     void SpawnFoundation()
     {
+        // 土台はCubeのまま（グレー）
         GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
         go.name = "Block_Foundation";
         go.transform.position = new Vector3(0f, nextBlockY, 0f);
@@ -94,8 +98,7 @@ public class BlockSpawner : MonoBehaviour
         TowerBlock block = go.AddComponent<TowerBlock>();
         block.spawner = this;
         block.previousBlock = null;
-        block.isDropped = true;  // 土台は最初から確定
-        // Initialize を呼ぶことで Start() での色上書きを防ぐ
+        block.isDropped = true;
         block.Initialize(0f, 0f, foundationColor);
 
         lastPlacedBlock = block;
@@ -104,7 +107,6 @@ public class BlockSpawner : MonoBehaviour
         nextBlockY += blockHeight;
         colorIndex = 0;
 
-        // 最初のブロックを生成
         SpawnNextBlock();
     }
 
@@ -114,19 +116,39 @@ public class BlockSpawner : MonoBehaviour
 
         float score = TowerGameManager.Instance != null ? TowerGameManager.Instance.Score : 0;
         float speed = baseSpeed + score * speedIncrement;
+        float w = lastPlacedBlock != null ? lastPlacedBlock.transform.localScale.x : blockWidth;
 
-        Color color = blockColors[colorIndex % blockColors.Length];
+        GameObject go;
+        if (meatPrefab != null)
+        {
+            // 肉モデルを使用
+            go = Object.Instantiate(meatPrefab);
+            go.name = "Block_" + score;
+            go.transform.localScale = new Vector3(w, blockHeight, blockDepth);
+            go.transform.position = new Vector3(moveRange, nextBlockY, 0f);
+        }
+        else
+        {
+            // フォールバック: Cube
+            Color color = blockColors[colorIndex % blockColors.Length];
+            go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            go.name = "Block_" + score;
+            go.transform.localScale = new Vector3(w, blockHeight, blockDepth);
+            go.transform.position = new Vector3(moveRange, nextBlockY, 0f);
+
+            var shader = ShaderUtil.GetLitShader();
+            if (shader != null)
+            {
+                var mat = new Material(shader);
+                mat.color = color;
+                go.GetComponent<MeshRenderer>().material = mat;
+            }
+        }
+
         colorIndex++;
 
-        GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        go.name = "Block_" + score;
-        // 前ブロックと同じ幅・奥行きから開始（スライスで変化する）
-        float w = lastPlacedBlock != null ? lastPlacedBlock.transform.localScale.x : blockWidth;
-        go.transform.localScale = new Vector3(w, blockHeight, blockDepth);
-        go.transform.position = new Vector3(moveRange, nextBlockY, 0f);
-
         TowerBlock block = go.AddComponent<TowerBlock>();
-        block.Initialize(speed, moveRange, color);
+        block.Initialize(speed, moveRange, Color.white);
         block.spawner = this;
         block.previousBlock = lastPlacedBlock;
 

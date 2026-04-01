@@ -153,19 +153,26 @@ public class TowerBlock : MonoBehaviour
     {
         if (width <= 0.01f) return;
 
-        GameObject debris = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        GameObject debris;
+        if (spawner != null && spawner.meatPrefab != null)
+        {
+            debris = Object.Instantiate(spawner.meatPrefab);
+        }
+        else
+        {
+            debris = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            var shader = ShaderUtil.GetLitShader();
+            if (shader != null)
+            {
+                var mat = new Material(shader);
+                mat.color = blockColor * 0.7f;
+                debris.GetComponent<MeshRenderer>().material = mat;
+            }
+        }
+
         debris.name = "Debris";
         debris.transform.position = new Vector3(centerX, transform.position.y, transform.position.z);
         debris.transform.localScale = new Vector3(width, transform.localScale.y, transform.localScale.z);
-
-        // デブリに色を設定
-        var shader = ShaderUtil.GetLitShader();
-        if (shader != null)
-        {
-            var mat = new Material(shader);
-            mat.color = blockColor * 0.7f;
-            debris.GetComponent<MeshRenderer>().material = mat;
-        }
 
         // 物理で落下
         Rigidbody rb = debris.AddComponent<Rigidbody>();
