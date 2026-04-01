@@ -1,7 +1,21 @@
 {
   "permissions": {
     "allow": [
-      "Bash(grep -v grep echo --- lsof -i :9001 -i :9002)"
+      "Bash(grep -v grep echo --- lsof -i :9001 -i :9002)",
+      "Bash(for f:*)",
+      "Bash(do echo:*)",
+      "Read(//Users/aoyagitoshihiko/RunGame/unko_001/**)",
+      "Bash(done)",
+      "Bash(wc -l /Users/aoyagitoshihiko/RunGame/unko_001/Assets/Scripts/*.cs)",
+      "Bash(mkdir -p /Users/aoyagitoshihiko/RunGame/unko_001/Assets/_Common/Scripts)",
+      "Bash(mkdir -p /Users/aoyagitoshihiko/RunGame/unko_001/Assets/_Common/Materials)",
+      "Bash(mkdir -p /Users/aoyagitoshihiko/RunGame/unko_001/Assets/Games/StackTower/Scripts)",
+      "Bash(mkdir -p /Users/aoyagitoshihiko/RunGame/unko_001/Assets/Games/StackTower/Scenes)",
+      "Bash(mkdir -p /Users/aoyagitoshihiko/RunGame/unko_001/Assets/GameSelect/Scripts)",
+      "Bash(mkdir -p /Users/aoyagitoshihiko/RunGame/unko_001/Assets/Games/CrowdRunner/Scripts)",
+      "Bash(mkdir -p /Users/aoyagitoshihiko/RunGame/unko_001/Assets/Games/CrowdRunner/Scenes)",
+      "Bash(mkdir -p /Users/aoyagitoshihiko/RunGame/unko_001/Assets/Games/BallBounce/Scripts)",
+      "Bash(mkdir -p /Users/aoyagitoshihiko/RunGame/unko_001/Assets/Games/BallBounce/Scenes)"
     ]
   }
 }
