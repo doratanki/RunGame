@@ -6,15 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/GameSelect/Scenes/GameSelect.unity
-    guid: 1f0999cdb06494d0eb329aec8a39eb46
-  - enabled: 1
-    path: Assets/Games/BallBounce/Scenes/BallBounce.unity
-    guid: a331e11ab1db04e3d8f80d0569fca8d4
-  - enabled: 1
-    path: Assets/Games/CrowdRunner/Scenes/CrowdRunner.unity
-    guid: 9eb441a93e13b45899131e8692f6a1d6
-  - enabled: 1
     path: Assets/Games/StackTower/Scenes/StackTower.unity
     guid: 67fe96f7e32cb493db19564835e4ab65
   m_configObjects:

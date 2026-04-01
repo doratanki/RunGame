@@ -41,6 +41,7 @@ public class TowerGameManager : MonoBehaviour
         ComboCount = 0;
         State = GameState.Playing;
 
+        TowerAudioManager.Instance?.PlayBGM();
         towerUI?.ShowGame(Score);
         blockSpawner?.StartSpawning();
 
@@ -61,6 +62,11 @@ public class TowerGameManager : MonoBehaviour
         int bonus = isPerfect ? Mathf.Min(ComboCount, 5) : 0;
         Score += 1 + bonus;
 
+        if (isPerfect)
+            TowerAudioManager.Instance?.PlayPerfect();
+        else
+            TowerAudioManager.Instance?.PlayBlockPlace();
+
         towerUI?.UpdateScore(Score);
         towerUI?.UpdateCombo(ComboCount, isPerfect);
 
@@ -76,6 +82,8 @@ public class TowerGameManager : MonoBehaviour
 
         ComboCount = 0;
         towerUI?.UpdateCombo(0, false);
+        TowerAudioManager.Instance?.StopBGM();
+        TowerAudioManager.Instance?.PlayGameOver();
         blockSpawner?.StopSpawning();
 
         int best = PlayerPrefs.GetInt(BestScoreKey, 0);
@@ -96,6 +104,6 @@ public class TowerGameManager : MonoBehaviour
 
     public void BackToTitle()
     {
-        SceneManager.LoadScene("GameSelect");
+        RestartGame();
     }
 }

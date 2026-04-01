@@ -137,7 +137,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &18288101
 RectTransform:
   m_ObjectHideFlags: 0
@@ -841,7 +841,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &762843848
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1429,6 +1429,7 @@ GameObject:
   m_Component:
   - component: {fileID: 871038059}
   - component: {fileID: 871038058}
+  - component: {fileID: 871038060}
   m_Layer: 0
   m_Name: TowerGameManager
   m_TagString: Untagged
@@ -1466,6 +1467,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &871038060
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 871038057}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95b55816f9ee94abea80534f870aaa2c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TowerAudioManager
+  bgmClip: {fileID: 0}
+  bgmVolume: 0.6
+  blockPlaceSE: {fileID: 0}
+  perfectSE: {fileID: 0}
+  gameOverSE: {fileID: 0}
+  seVolume: 1
 --- !u!1 &984029981
 GameObject:
   m_ObjectHideFlags: 0
