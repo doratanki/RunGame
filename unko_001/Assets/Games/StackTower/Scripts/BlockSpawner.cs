@@ -40,6 +40,9 @@ public class BlockSpawner : MonoBehaviour
     // 各ブロックの Y 座標（土台は 0）
     private float nextBlockY = 0f;
 
+    // 次に生成するブロックの移動軸（X→Z→X→... と交互）
+    private MoveAxis _nextAxis = MoveAxis.X;
+
     public void StartSpawning()
     {
         isSpawning = true;
@@ -47,6 +50,7 @@ public class BlockSpawner : MonoBehaviour
         nextBlockY = 0f;
         lastPlacedBlock = null;
         currentBlock = null;
+        _nextAxis = MoveAxis.X;
 
         // 土台ブロックを生成（動かない）
         SpawnFoundation();
@@ -116,25 +120,38 @@ public class BlockSpawner : MonoBehaviour
 
         float score = TowerGameManager.Instance != null ? TowerGameManager.Instance.Score : 0;
         float speed = baseSpeed + score * speedIncrement;
+
+        MoveAxis axis = _nextAxis;
+        _nextAxis = axis == MoveAxis.X ? MoveAxis.Z : MoveAxis.X;
+
+        // 前ブロックの幅・奥行を引き継ぐ
         float w = lastPlacedBlock != null ? lastPlacedBlock.transform.localScale.x : blockWidth;
+        float d = lastPlacedBlock != null ? lastPlacedBlock.transform.localScale.z : blockDepth;
+
+        // 前ブロックの中心位置（固定軸は前ブロックに揃える）
+        float prevX = lastPlacedBlock != null ? lastPlacedBlock.transform.position.x : 0f;
+        float prevZ = lastPlacedBlock != null ? lastPlacedBlock.transform.position.z : 0f;
+
+        // スタート位置：移動軸は +moveRange、固定軸は前ブロックの中心
+        Vector3 spawnPos = axis == MoveAxis.X
+            ? new Vector3(moveRange, nextBlockY, prevZ)
+            : new Vector3(prevX, nextBlockY, moveRange);
 
         GameObject go;
         if (meatPrefab != null)
         {
-            // 肉モデルを使用
             go = Object.Instantiate(meatPrefab);
             go.name = "Block_" + score;
-            go.transform.localScale = new Vector3(w, blockHeight, blockDepth);
-            go.transform.position = new Vector3(moveRange, nextBlockY, 0f);
+            go.transform.localScale = new Vector3(w, blockHeight, d);
+            go.transform.position = spawnPos;
         }
         else
         {
-            // フォールバック: Cube
             Color color = blockColors[colorIndex % blockColors.Length];
             go = GameObject.CreatePrimitive(PrimitiveType.Cube);
             go.name = "Block_" + score;
-            go.transform.localScale = new Vector3(w, blockHeight, blockDepth);
-            go.transform.position = new Vector3(moveRange, nextBlockY, 0f);
+            go.transform.localScale = new Vector3(w, blockHeight, d);
+            go.transform.position = spawnPos;
 
             var shader = ShaderUtil.GetLitShader();
             if (shader != null)
@@ -148,7 +165,7 @@ public class BlockSpawner : MonoBehaviour
         colorIndex++;
 
         TowerBlock block = go.AddComponent<TowerBlock>();
-        block.Initialize(speed, moveRange, Color.white);
+        block.Initialize(speed, moveRange, Color.white, axis);
         block.spawner = this;
         block.previousBlock = lastPlacedBlock;
 
@@ -159,13 +176,13 @@ public class BlockSpawner : MonoBehaviour
     /// <summary>
     /// TowerBlock.Slice() 完了後に呼ばれる。
     /// </summary>
-    public void OnBlockPlaced(TowerBlock block, bool isPerfect = false)
+    public void OnBlockPlaced(TowerBlock block, PlacementQuality quality = PlacementQuality.Good)
     {
         lastPlacedBlock = block;
         topBlockTransform = block.transform;
         nextBlockY += blockHeight;
 
-        TowerGameManager.Instance?.OnBlockStacked(isPerfect);
+        TowerGameManager.Instance?.OnBlockStacked(quality);
 
         SpawnNextBlock();
     }

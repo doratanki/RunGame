@@ -19,7 +19,7 @@ public class TowerGameManager : MonoBehaviour
     public int Score { get; private set; } = 0;
     public int ComboCount { get; private set; } = 0;
 
-    private const string BestScoreKey = "StackTower_BestScore";
+    private const string BestScoreKey = "TexasMeatTower_BestScore";
 
     void Awake()
     {
@@ -50,25 +50,25 @@ public class TowerGameManager : MonoBehaviour
             cameraFollow.target = blockSpawner.topBlockTransform;
     }
 
-    public void OnBlockStacked(bool isPerfect = false)
+    public void OnBlockStacked(PlacementQuality quality = PlacementQuality.Good)
     {
         if (State != GameState.Playing) return;
 
-        if (isPerfect)
+        if (quality == PlacementQuality.Perfect)
             ComboCount++;
         else
             ComboCount = 0;
 
-        int bonus = isPerfect ? Mathf.Min(ComboCount, 5) : 0;
+        int bonus = quality == PlacementQuality.Perfect ? Mathf.Min(ComboCount, 5) : 0;
         Score += 1 + bonus;
 
-        if (isPerfect)
+        if (quality == PlacementQuality.Perfect)
             TowerAudioManager.Instance?.PlayPerfect();
         else
             TowerAudioManager.Instance?.PlayBlockPlace();
 
         towerUI?.UpdateScore(Score);
-        towerUI?.UpdateCombo(ComboCount, isPerfect);
+        towerUI?.UpdatePlacement(quality, ComboCount);
 
         // カメラターゲットを最新ブロックに更新
         if (cameraFollow != null && blockSpawner != null)
@@ -81,7 +81,6 @@ public class TowerGameManager : MonoBehaviour
         State = GameState.GameOver;
 
         ComboCount = 0;
-        towerUI?.UpdateCombo(0, false);
         TowerAudioManager.Instance?.StopBGM();
         TowerAudioManager.Instance?.PlayGameOver();
         blockSpawner?.StopSpawning();
@@ -95,6 +94,7 @@ public class TowerGameManager : MonoBehaviour
         }
 
         towerUI?.ShowGameOver(Score, best);
+        AdsManager.Instance?.ShowInterstitial();
     }
 
     public void RestartGame()

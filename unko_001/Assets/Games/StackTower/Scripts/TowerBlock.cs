@@ -3,6 +3,7 @@ using UnityEngine;
 /// <summary>
 /// 積み上げ中の1ブロックを管理する。
 /// Drop() を呼ぶと移動を止め、前のブロックと重なりを計算して Slice する。
+/// X軸・Z軸どちらの移動にも対応。
 /// </summary>
 public class TowerBlock : MonoBehaviour
 {
@@ -14,9 +15,9 @@ public class TowerBlock : MonoBehaviour
 
     // 移動パラメータ（BlockSpawner が設定）
     public float moveSpeed = 3f;
-    // +moveRange からスタートするので最初は左向き(-1)
     private int moveDirection = -1;
-    private float moveRange = 3f; // X 軸の往復範囲（±）
+    private float moveRange = 3f;
+    [HideInInspector] public MoveAxis moveAxis = MoveAxis.X;
 
     // ブロックカラー（BlockSpawner が設定）
     public Color blockColor = Color.white;
@@ -31,7 +32,6 @@ public class TowerBlock : MonoBehaviour
 
     void Start()
     {
-        // Initialize() で色が明示的に設定された場合のみ適用
         if (_colorInitialized && meshRenderer != null)
         {
             var shader = ShaderUtil.GetLitShader();
@@ -44,11 +44,12 @@ public class TowerBlock : MonoBehaviour
         }
     }
 
-    public void Initialize(float speed, float range, Color color)
+    public void Initialize(float speed, float range, Color color, MoveAxis axis = MoveAxis.X)
     {
         moveSpeed = speed;
         moveRange = range;
         blockColor = color;
+        moveAxis = axis;
         _colorInitialized = true;
     }
 
@@ -56,16 +57,23 @@ public class TowerBlock : MonoBehaviour
     {
         if (isDropped) return;
 
-        // X 軸往復
-        transform.position += Vector3.right * moveSpeed * moveDirection * Time.deltaTime;
+        Vector3 dir = moveAxis == MoveAxis.X ? Vector3.right : Vector3.forward;
+        transform.position += dir * moveSpeed * moveDirection * Time.deltaTime;
 
-        float currentX = transform.position.x;
-        if (currentX > moveRange || currentX < -moveRange)
+        float current = moveAxis == MoveAxis.X ? transform.position.x : transform.position.z;
+        if (current > moveRange || current < -moveRange)
         {
             moveDirection *= -1;
-            // 範囲内に補正
-            float clampedX = Mathf.Clamp(transform.position.x, -moveRange, moveRange);
-            transform.position = new Vector3(clampedX, transform.position.y, transform.position.z);
+            if (moveAxis == MoveAxis.X)
+            {
+                float clamped = Mathf.Clamp(transform.position.x, -moveRange, moveRange);
+                transform.position = new Vector3(clamped, transform.position.y, transform.position.z);
+            }
+            else
+            {
+                float clamped = Mathf.Clamp(transform.position.z, -moveRange, moveRange);
+                transform.position = new Vector3(transform.position.x, transform.position.y, clamped);
+            }
         }
     }
 
@@ -79,7 +87,6 @@ public class TowerBlock : MonoBehaviour
 
         if (previousBlock == null)
         {
-            // 土台ブロックはそのまま確定
             spawner.OnBlockPlaced(this);
             return;
         }
@@ -88,70 +95,80 @@ public class TowerBlock : MonoBehaviour
     }
 
     private const float PerfectThreshold = 0.1f;
+    private const float GoodRatio = 0.35f;
 
     void Slice()
     {
-        float prevLeft  = previousBlock.transform.position.x - previousBlock.transform.localScale.x / 2f;
-        float prevRight = previousBlock.transform.position.x + previousBlock.transform.localScale.x / 2f;
-        float currLeft  = transform.position.x - transform.localScale.x / 2f;
-        float currRight = transform.position.x + transform.localScale.x / 2f;
+        bool isX = moveAxis == MoveAxis.X;
+
+        float prevCenter = isX ? previousBlock.transform.position.x : previousBlock.transform.position.z;
+        float prevSize   = isX ? previousBlock.transform.localScale.x : previousBlock.transform.localScale.z;
+        float currCenter = isX ? transform.position.x : transform.position.z;
+        float currSize   = isX ? transform.localScale.x : transform.localScale.z;
+
+        float prevLeft  = prevCenter - prevSize / 2f;
+        float prevRight = prevCenter + prevSize / 2f;
+        float currLeft  = currCenter - currSize / 2f;
+        float currRight = currCenter + currSize / 2f;
 
         float overlapLeft  = Mathf.Max(prevLeft,  currLeft);
         float overlapRight = Mathf.Min(prevRight, currRight);
-        float overlapWidth = overlapRight - overlapLeft;
+        float overlapSize  = overlapRight - overlapLeft;
 
-        if (overlapWidth <= 0f)
+        if (overlapSize <= 0f)
         {
-            // 完全に外れた → ゲームオーバー
-            SpawnDebris(transform.position.x, transform.localScale.x);
+            SpawnDebris(currCenter, currSize, isX);
             gameObject.SetActive(false);
             TowerGameManager.Instance?.OnGameOver();
             return;
         }
 
-        // パーフェクト判定: はみ出し量が閾値以下
-        float trimAmount = previousBlock.transform.localScale.x - overlapWidth;
-        bool isPerfect = trimAmount < PerfectThreshold;
+        float trimAmount = currSize - overlapSize;
+        PlacementQuality quality;
 
-        if (isPerfect)
+        if (trimAmount < PerfectThreshold)
+            quality = PlacementQuality.Perfect;
+        else if (trimAmount < currSize * GoodRatio)
+            quality = PlacementQuality.Good;
+        else
+            quality = PlacementQuality.Bad;
+
+        if (quality == PlacementQuality.Perfect)
         {
-            // ブロック幅を維持し、前ブロック中心にスナップ
-            transform.position = new Vector3(
-                previousBlock.transform.position.x,
-                transform.position.y,
-                transform.position.z);
+            // 前ブロック中心にスナップ
+            if (isX)
+                transform.position = new Vector3(prevCenter, transform.position.y, transform.position.z);
+            else
+                transform.position = new Vector3(transform.position.x, transform.position.y, prevCenter);
         }
         else
         {
-            // はみ出た部分をデブリとして落下
             float leftDiff  = overlapLeft  - currLeft;
             float rightDiff = currRight - overlapRight;
 
             if (leftDiff > 0.01f)
-            {
-                float debrisX = currLeft + leftDiff / 2f;
-                SpawnDebris(debrisX, leftDiff);
-            }
+                SpawnDebris(currLeft + leftDiff / 2f, leftDiff, isX);
             if (rightDiff > 0.01f)
-            {
-                float debrisX = overlapRight + rightDiff / 2f;
-                SpawnDebris(debrisX, rightDiff);
-            }
+                SpawnDebris(overlapRight + rightDiff / 2f, rightDiff, isX);
 
-            // 現ブロックを overlap 幅に切り詰め
-            float newCenterX = (overlapLeft + overlapRight) / 2f;
+            float newCenter = (overlapLeft + overlapRight) / 2f;
             Vector3 scale = transform.localScale;
-            scale.x = overlapWidth;
+            if (isX) scale.x = overlapSize;
+            else     scale.z = overlapSize;
             transform.localScale = scale;
-            transform.position = new Vector3(newCenterX, transform.position.y, transform.position.z);
+
+            if (isX)
+                transform.position = new Vector3(newCenter, transform.position.y, transform.position.z);
+            else
+                transform.position = new Vector3(transform.position.x, transform.position.y, newCenter);
         }
 
-        spawner.OnBlockPlaced(this, isPerfect);
+        spawner.OnBlockPlaced(this, quality);
     }
 
-    void SpawnDebris(float centerX, float width)
+    void SpawnDebris(float center, float size, bool isXAxis)
     {
-        if (width <= 0.01f) return;
+        if (size <= 0.01f) return;
 
         GameObject debris;
         if (spawner != null && spawner.meatPrefab != null)
@@ -171,15 +188,22 @@ public class TowerBlock : MonoBehaviour
         }
 
         debris.name = "Debris";
-        debris.transform.position = new Vector3(centerX, transform.position.y, transform.position.z);
-        debris.transform.localScale = new Vector3(width, transform.localScale.y, transform.localScale.z);
 
-        // 物理で落下
+        if (isXAxis)
+        {
+            debris.transform.position  = new Vector3(center, transform.position.y, transform.position.z);
+            debris.transform.localScale = new Vector3(size, transform.localScale.y, transform.localScale.z);
+        }
+        else
+        {
+            debris.transform.position  = new Vector3(transform.position.x, transform.position.y, center);
+            debris.transform.localScale = new Vector3(transform.localScale.x, transform.localScale.y, size);
+        }
+
         Rigidbody rb = debris.AddComponent<Rigidbody>();
-        rb.linearVelocity = new Vector3(Random.Range(-1f, 1f), -1f, 0f);
-        rb.angularVelocity = new Vector3(0f, 0f, Random.Range(-2f, 2f));
+        rb.linearVelocity   = new Vector3(Random.Range(-1f, 1f), -1f, Random.Range(-1f, 1f));
+        rb.angularVelocity  = new Vector3(Random.Range(-2f, 2f), 0f, Random.Range(-2f, 2f));
 
-        // 5秒後に自動削除
         Destroy(debris, 5f);
     }
 }

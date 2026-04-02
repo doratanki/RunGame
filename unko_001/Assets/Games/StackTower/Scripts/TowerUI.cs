@@ -16,6 +16,8 @@ public class TowerUI : MonoBehaviour
     public TextMeshProUGUI scoreText;
     public TextMeshProUGUI comboText;
     public ComboUIAnimator perfectAnimator;
+    public ComboUIAnimator goodAnimator;
+    public ComboUIAnimator badAnimator;
 
     [Header("ゲームオーバー")]
     public TextMeshProUGUI gameOverScoreText;
@@ -30,7 +32,7 @@ public class TowerUI : MonoBehaviour
     {
         SetPanels(start: false, game: true, gameOver: false);
         UpdateScore(score);
-        UpdateCombo(0, false);
+        if (comboText != null) comboText.text = "";
     }
 
     public void UpdateScore(int score)
@@ -39,13 +41,23 @@ public class TowerUI : MonoBehaviour
             scoreText.text = score.ToString();
     }
 
-    public void UpdateCombo(int comboCount, bool isPerfect)
+    public void UpdatePlacement(PlacementQuality quality, int comboCount)
     {
         if (comboText != null)
             comboText.text = comboCount >= 2 ? $"x{comboCount} COMBO" : "";
 
-        if (isPerfect && perfectAnimator != null)
-            perfectAnimator.PlayPerfect();
+        switch (quality)
+        {
+            case PlacementQuality.Perfect:
+                perfectAnimator?.PlayPerfect();
+                break;
+            case PlacementQuality.Good:
+                goodAnimator?.PlayPerfect();
+                break;
+            case PlacementQuality.Bad:
+                badAnimator?.PlayPerfect();
+                break;
+        }
     }
 
     public void ShowGameOver(int score, int best)

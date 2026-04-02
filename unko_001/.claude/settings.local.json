@@ -17,7 +17,8 @@
       "Bash(mkdir -p /Users/aoyagitoshihiko/RunGame/unko_001/Assets/Games/BallBounce/Scripts)",
       "Bash(mkdir -p /Users/aoyagitoshihiko/RunGame/unko_001/Assets/Games/BallBounce/Scenes)",
       "mcp__unity__Unity_RunCommand",
-      "mcp__unity__Unity_Camera_Capture"
+      "mcp__unity__Unity_Camera_Capture",
+      "WebSearch"
     ]
   }
 }
