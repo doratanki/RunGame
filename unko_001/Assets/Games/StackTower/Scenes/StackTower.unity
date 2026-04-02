@@ -521,7 +521,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 444345117}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -1265,6 +1265,8 @@ MonoBehaviour:
   scoreText: {fileID: 1488012611}
   comboText: {fileID: 1435311395}
   perfectAnimator: {fileID: 1842246562}
+  goodAnimator: {fileID: 0}
+  badAnimator: {fileID: 0}
   gameOverScoreText: {fileID: 483619552}
   gameOverBestText: {fileID: 783873287}
 --- !u!4 &803928770
@@ -2220,6 +2222,7 @@ MonoBehaviour:
   moveRange: 3
   baseSpeed: 2.5
   speedIncrement: 0.1
+  bbqTablePrefab: {fileID: 7617340455316162190, guid: 8c8323236ab55458faf1e97c54ef285b, type: 3}
   meatPrefab: {fileID: 7718836575668033175, guid: 8d6742ef94a6b48a6bd8e4b9411886ef, type: 3}
   blockColors:
   - {r: 0.95, g: 0.35, b: 0.35, a: 1}

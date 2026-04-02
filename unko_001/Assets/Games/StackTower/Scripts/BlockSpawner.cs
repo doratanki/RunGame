@@ -16,6 +16,9 @@ public class BlockSpawner : MonoBehaviour
     public float baseSpeed      = 2.5f;
     public float speedIncrement = 0.1f;  // スコアごとの加速量
 
+    [Header("土台モデル（設定するとCubeの代わりに使用）")]
+    public GameObject bbqTablePrefab;
+
     [Header("肉モデル（設定するとCubeの代わりに使用）")]
     public GameObject meatPrefab;
 
@@ -84,19 +87,45 @@ public class BlockSpawner : MonoBehaviour
 
     void SpawnFoundation()
     {
-        // 土台はCubeのまま（グレー）
-        GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        go.name = "Block_Foundation";
-        go.transform.position = new Vector3(0f, nextBlockY, 0f);
-        go.transform.localScale = new Vector3(blockWidth, blockHeight, blockDepth);
-
+        GameObject go;
         var foundationColor = new Color(0.4f, 0.4f, 0.4f);
-        var shader = ShaderUtil.GetLitShader();
-        if (shader != null)
+
+        if (bbqTablePrefab != null)
         {
-            var mat = new Material(shader);
-            mat.color = foundationColor;
-            go.GetComponent<MeshRenderer>().material = mat;
+            go = Object.Instantiate(bbqTablePrefab);
+            go.name = "Block_Foundation";
+            go.transform.position = new Vector3(0f, nextBlockY - 2f, 0f);
+
+            // BBQTable の実際の上端を計算して次ブロックのY座標を決める
+            Renderer[] renderers = go.GetComponentsInChildren<Renderer>();
+            if (renderers.Length > 0)
+            {
+                Bounds bounds = renderers[0].bounds;
+                foreach (var r in renderers)
+                    bounds.Encapsulate(r.bounds);
+                nextBlockY = bounds.max.y;
+            }
+            else
+            {
+                nextBlockY += blockHeight;
+            }
+        }
+        else
+        {
+            // 土台はCubeのまま（グレー）
+            go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            go.name = "Block_Foundation";
+            go.transform.position = new Vector3(0f, nextBlockY, 0f);
+            go.transform.localScale = new Vector3(blockWidth, blockHeight, blockDepth);
+
+            var shader = ShaderUtil.GetLitShader();
+            if (shader != null)
+            {
+                var mat = new Material(shader);
+                mat.color = foundationColor;
+                go.GetComponent<MeshRenderer>().material = mat;
+            }
+            nextBlockY += blockHeight;
         }
 
         TowerBlock block = go.AddComponent<TowerBlock>();
@@ -107,8 +136,6 @@ public class BlockSpawner : MonoBehaviour
 
         lastPlacedBlock = block;
         topBlockTransform = go.transform;
-
-        nextBlockY += blockHeight;
         colorIndex = 0;
 
         SpawnNextBlock();
