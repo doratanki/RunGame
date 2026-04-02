@@ -2279,7 +2279,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraFollow
   target: {fileID: 0}
-  offset: {x: 5, y: 5, z: -10}
+  offset: {x: 7, y: 7, z: -20}
   smoothSpeed: 4
 --- !u!81 &1647902314
 AudioListener:

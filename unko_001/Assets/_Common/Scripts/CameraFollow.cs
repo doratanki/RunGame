@@ -10,7 +10,7 @@ public class CameraFollow : MonoBehaviour
     public Transform target;
 
     [Header("オフセット（カメラ位置の相対値）")]
-    public Vector3 offset = new Vector3(5f, 5f, -10f);
+    public Vector3 offset = new Vector3(7f, 7f, -20f);
 
     [Header("スムーズ速度")]
     public float smoothSpeed = 4f;
