@@ -87,16 +87,18 @@ public class BlockSpawner : MonoBehaviour
 
     void SpawnFoundation()
     {
-        GameObject go;
         var foundationColor = new Color(0.4f, 0.4f, 0.4f);
+        GameObject go;
 
         if (bbqTablePrefab != null)
         {
             go = Object.Instantiate(bbqTablePrefab);
             go.name = "Block_Foundation";
             go.transform.position = new Vector3(0f, nextBlockY - 2f, 0f);
+            // x/z を blockWidth/blockDepth に合わせることで、次ブロックが正しいサイズを引き継ぐ
+            go.transform.localScale = new Vector3(blockWidth, 1f, blockDepth);
 
-            // BBQTable の実際の上端を計算して次ブロックのY座標を決める
+            // BBQTable の実際の上端から次ブロックのY座標を決める
             Renderer[] renderers = go.GetComponentsInChildren<Renderer>();
             if (renderers.Length > 0)
             {
@@ -112,7 +114,6 @@ public class BlockSpawner : MonoBehaviour
         }
         else
         {
-            // 土台はCubeのまま（グレー）
             go = GameObject.CreatePrimitive(PrimitiveType.Cube);
             go.name = "Block_Foundation";
             go.transform.position = new Vector3(0f, nextBlockY, 0f);
