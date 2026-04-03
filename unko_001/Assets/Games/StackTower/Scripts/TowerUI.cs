@@ -52,10 +52,10 @@ public class TowerUI : MonoBehaviour
                 perfectAnimator?.PlayPerfect();
                 break;
             case PlacementQuality.Good:
-                goodAnimator?.PlayPerfect();
+                goodAnimator?.PlayGood();
                 break;
             case PlacementQuality.Bad:
-                badAnimator?.PlayPerfect();
+                badAnimator?.PlayBad();
                 break;
         }
     }

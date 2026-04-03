@@ -103,6 +103,10 @@ public class TowerBlock : MonoBehaviour
 
         float prevCenter = isX ? previousBlock.transform.position.x : previousBlock.transform.position.z;
         float prevSize   = isX ? previousBlock.transform.localScale.x : previousBlock.transform.localScale.z;
+
+        // 1ブロック目（土台の上）だけあたり判定を1.3倍に
+        if (previousBlock.previousBlock == null)
+            prevSize *= 1.7f;
         float currCenter = isX ? transform.position.x : transform.position.z;
         float currSize   = isX ? transform.localScale.x : transform.localScale.z;
 
@@ -124,9 +128,10 @@ public class TowerBlock : MonoBehaviour
         }
 
         float trimAmount = currSize - overlapSize;
+        bool isFirst = previousBlock.previousBlock == null;
         PlacementQuality quality;
 
-        if (trimAmount < PerfectThreshold)
+        if (!isFirst && trimAmount < PerfectThreshold)
             quality = PlacementQuality.Perfect;
         else if (trimAmount < currSize * GoodRatio)
             quality = PlacementQuality.Good;
@@ -135,6 +140,8 @@ public class TowerBlock : MonoBehaviour
 
         if (quality == PlacementQuality.Perfect)
         {
+            HapticManager.TriggerLight();
+            PerfectEffectManager.Instance?.PlayPerfect(transform.position);
             // 前ブロック中心にスナップ
             if (isX)
                 transform.position = new Vector3(prevCenter, transform.position.y, transform.position.z);
@@ -200,6 +207,9 @@ public class TowerBlock : MonoBehaviour
             debris.transform.localScale = new Vector3(transform.localScale.x, transform.localScale.y, size);
         }
 
+        // meatPrefab は Collider を持つ想定、CreatePrimitive は自動生成されるのでチェック不要
+        if (spawner != null && spawner.meatPrefab != null && debris.GetComponent<Collider>() == null)
+            debris.AddComponent<BoxCollider>();
         Rigidbody rb = debris.AddComponent<Rigidbody>();
         rb.linearVelocity   = new Vector3(Random.Range(-1f, 1f), -1f, Random.Range(-1f, 1f));
         rb.angularVelocity  = new Vector3(Random.Range(-2f, 2f), 0f, Random.Range(-2f, 2f));

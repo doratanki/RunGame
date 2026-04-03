@@ -18,7 +18,11 @@
       "Bash(mkdir -p /Users/aoyagitoshihiko/RunGame/unko_001/Assets/Games/BallBounce/Scenes)",
       "mcp__unity__Unity_RunCommand",
       "mcp__unity__Unity_Camera_Capture",
-      "WebSearch"
+      "WebSearch",
+      "Bash(find /Users/aoyagitoshihiko/RunGame/unko_001/Library/PackageCache/com.unity.ai.assistant* -name \"relay*\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d, indent=2\\)\\)\")",
+      "Bash(chmod +x /Users/aoyagitoshihiko/RunGame/unko_001/open_project.sh)",
+      "Bash(/Users/aoyagitoshihiko/RunGame/unko_001/open_project.sh)"
     ]
   }
 }

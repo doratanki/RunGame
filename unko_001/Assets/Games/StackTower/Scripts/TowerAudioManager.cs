@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 /// <summary>
@@ -12,6 +13,7 @@ public class TowerAudioManager : MonoBehaviour
     [Header("BGM")]
     public AudioClip bgmClip;
     [Range(0f, 1f)] public float bgmVolume = 0.6f;
+    public float bgmFadeDuration = 1f;
 
     [Header("SE")]
     public AudioClip blockPlaceSE;   // 通常設置
@@ -52,14 +54,28 @@ public class TowerAudioManager : MonoBehaviour
     {
         if (bgmClip == null || _bgmSource.isPlaying) return;
         _bgmSource.clip = bgmClip;
-        _bgmSource.volume = bgmVolume;
+        _bgmSource.volume = 0f;
         _bgmSource.Play();
+        StartCoroutine(FadeBGM(0f, bgmVolume, bgmFadeDuration));
     }
 
     public void StopBGM()
     {
         if (_bgmSource.isPlaying)
-            _bgmSource.Stop();
+            StartCoroutine(FadeBGM(bgmVolume, 0f, bgmFadeDuration, stopOnComplete: true));
+    }
+
+    IEnumerator FadeBGM(float from, float to, float duration, bool stopOnComplete = false)
+    {
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            _bgmSource.volume = Mathf.Lerp(from, to, elapsed / duration);
+            yield return null;
+        }
+        _bgmSource.volume = to;
+        if (stopOnComplete) _bgmSource.Stop();
     }
 
     // ---- SE ----

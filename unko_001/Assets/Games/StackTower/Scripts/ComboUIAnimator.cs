@@ -20,21 +20,32 @@ public class ComboUIAnimator : MonoBehaviour
     {
         if (_currentAnim != null)
             StopCoroutine(_currentAnim);
-        _currentAnim = StartCoroutine(PerfectRoutine());
+        _currentAnim = StartCoroutine(AnimRoutine(Color.white));
     }
 
-    IEnumerator PerfectRoutine()
+    public void PlayGood()
+    {
+        if (_currentAnim != null)
+            StopCoroutine(_currentAnim);
+        _currentAnim = StartCoroutine(AnimRoutine(new Color(0.4f, 0.9f, 0.4f)));
+    }
+
+    public void PlayBad()
+    {
+        if (_currentAnim != null)
+            StopCoroutine(_currentAnim);
+        _currentAnim = StartCoroutine(AnimRoutine(new Color(0.9f, 0.4f, 0.4f)));
+    }
+
+    IEnumerator AnimRoutine(Color textColor)
     {
         if (perfectText == null) yield break;
 
-        // 完全不透明で表示
-        SetAlpha(1f);
+        perfectText.color = new Color(textColor.r, textColor.g, textColor.b, 1f);
         perfectText.gameObject.SetActive(true);
 
-        // 表示を維持
         yield return new WaitForSeconds(displayDuration);
 
-        // フェードアウト
         float elapsed = 0f;
         while (elapsed < fadeDuration)
         {
@@ -54,5 +65,11 @@ public class ComboUIAnimator : MonoBehaviour
         var c = perfectText.color;
         c.a = alpha;
         perfectText.color = c;
+    }
+
+    void OnDestroy()
+    {
+        if (_currentAnim != null)
+            StopCoroutine(_currentAnim);
     }
 }

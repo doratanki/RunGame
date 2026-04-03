@@ -15,15 +15,18 @@ public class CameraFollow : MonoBehaviour
     [Header("スムーズ速度")]
     public float smoothSpeed = 4f;
 
+    [HideInInspector] public Vector3 shakeOffset;
+
     void LateUpdate()
     {
         if (target == null) return;
 
         // X / Z はオフセット固定、Y のみターゲットに追従
         float targetY = target.position.y + offset.y;
-        Vector3 desiredPos = new Vector3(offset.x, targetY, offset.z);
+        Vector3 desiredPos = new Vector3(offset.x, targetY, offset.z) + shakeOffset;
 
-        transform.position = Vector3.Lerp(transform.position, desiredPos, smoothSpeed * Time.deltaTime);
+        float t = 1f - Mathf.Exp(-smoothSpeed * Time.deltaTime);
+        transform.position = Vector3.Lerp(transform.position, desiredPos, t);
         transform.LookAt(new Vector3(0f, target.position.y, 0f));
     }
 }
