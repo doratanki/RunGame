@@ -32,6 +32,7 @@ public class TowerGameManager : MonoBehaviour
     void Start()
     {
         State = GameState.Menu;
+        TowerAudioManager.Instance?.PlayBGM();
         towerUI?.ShowMenu();
     }
 
@@ -40,8 +41,6 @@ public class TowerGameManager : MonoBehaviour
         Score = 0;
         ComboCount = 0;
         State = GameState.Playing;
-
-        TowerAudioManager.Instance?.PlayBGM();
         towerUI?.ShowGame(Score);
         blockSpawner?.StartSpawning();
 
@@ -81,7 +80,6 @@ public class TowerGameManager : MonoBehaviour
         State = GameState.GameOver;
 
         ComboCount = 0;
-        TowerAudioManager.Instance?.StopBGM();
         TowerAudioManager.Instance?.PlayGameOver();
         blockSpawner?.StopSpawning();
 
@@ -99,11 +97,14 @@ public class TowerGameManager : MonoBehaviour
 
     public void RestartGame()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        blockSpawner?.ClearBlocks();
+        StartGame();
     }
 
     public void BackToTitle()
     {
-        RestartGame();
+        blockSpawner?.ClearBlocks();
+        State = GameState.Menu;
+        towerUI?.ShowMenu();
     }
 }

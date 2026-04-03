@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -40,6 +41,8 @@ public class BlockSpawner : MonoBehaviour
     private int colorIndex = 0;
     private bool isSpawning = false;
 
+    private readonly List<GameObject> _spawnedObjects = new List<GameObject>();
+
     // 各ブロックの Y 座標（土台は 0）
     private float nextBlockY = 0f;
 
@@ -66,6 +69,25 @@ public class BlockSpawner : MonoBehaviour
         {
             currentBlock.isDropped = true;
         }
+    }
+
+    public void RegisterSpawnedObject(GameObject go)
+    {
+        _spawnedObjects.Add(go);
+    }
+
+    public void ClearBlocks()
+    {
+        foreach (var go in _spawnedObjects)
+            if (go != null) Object.Destroy(go);
+        _spawnedObjects.Clear();
+
+        lastPlacedBlock = null;
+        currentBlock = null;
+        topBlockTransform = null;
+        nextBlockY = 0f;
+        colorIndex = 0;
+        _nextAxis = MoveAxis.X;
     }
 
     void Update()
@@ -129,6 +151,7 @@ public class BlockSpawner : MonoBehaviour
             nextBlockY += blockHeight;
         }
 
+        _spawnedObjects.Add(go);
         TowerBlock block = go.AddComponent<TowerBlock>();
         block.spawner = this;
         block.previousBlock = null;
@@ -191,6 +214,7 @@ public class BlockSpawner : MonoBehaviour
         }
 
         colorIndex++;
+        _spawnedObjects.Add(go);
 
         TowerBlock block = go.AddComponent<TowerBlock>();
         block.Initialize(speed, moveRange, Color.white, axis);

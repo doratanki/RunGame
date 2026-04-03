@@ -195,6 +195,7 @@ public class TowerBlock : MonoBehaviour
         }
 
         debris.name = "Debris";
+        spawner?.RegisterSpawnedObject(debris);
 
         if (isXAxis)
         {
