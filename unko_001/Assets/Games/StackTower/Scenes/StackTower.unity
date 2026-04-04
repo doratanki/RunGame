@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_SkyboxMaterial: {fileID: 2100000, guid: 8d981dd13633d40328e887aba3af6b34, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -1367,6 +1367,7 @@ GameObject:
   - component: {fileID: 871038058}
   - component: {fileID: 871038060}
   - component: {fileID: 871038061}
+  - component: {fileID: 871038062}
   m_Layer: 0
   m_Name: TowerGameManager
   m_TagString: Untagged
@@ -1445,6 +1446,22 @@ MonoBehaviour:
   vignetteColor: {r: 1, g: 0.85, b: 0, a: 0.5}
   vignetteDuration: 0.4
   perfectParticle: {fileID: 0}
+--- !u!114 &871038062
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 871038057}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 645ffbd47598e428da9708d358093340, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AdsManager
+  gameIdIos: 6081978
+  gameIdAndroid: 6081979
+  interstitialAdUnitId: Interstitial_Android
+  testMode: 1
 --- !u!1 &1291676811
 GameObject:
   m_ObjectHideFlags: 0

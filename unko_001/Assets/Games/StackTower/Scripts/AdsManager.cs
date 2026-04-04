@@ -1,27 +1,32 @@
+using System;
+using System.Collections;
+using Unity.Services.Core;
 using UnityEngine;
 using UnityEngine.Advertisements;
 
 /// <summary>
-/// Unity Ads を管理するシングルトン。
+/// Unity Ads (UGS) を管理するシングルトン。
 /// TowerGameManager と同じ GameObject にアタッチする。
 ///
 /// 使い方:
 ///   1. Inspector で gameIdIos / gameIdAndroid を設定
 ///   2. TowerGameManager.OnGameOver() の末尾で AdsManager.Instance?.ShowInterstitial() を呼ぶ
+///
+/// 必要パッケージ:
+///   - com.unity.services.core
+///   - com.unity.ads (4.x)
 /// </summary>
 public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoadListener, IUnityAdsShowListener
 {
     public static AdsManager Instance { get; private set; }
 
-    [Header("Game ID（Unity Dashboard で確認）")]
-    public string gameIdIos     = "YOUR_IOS_GAME_ID";
-    public string gameIdAndroid = "YOUR_ANDROID_GAME_ID";
+    private const string GameIdIos     = "6082458";
+    private const string GameIdAndroid = "6082459";
+    private const string InterstitialAdUnitIdIos     = "Interstitial_iOS";
+    private const string InterstitialAdUnitIdAndroid = "Interstitial_Android";
+    private const bool   TestMode = true;
 
-    [Header("広告ユニット ID（デフォルトのまま変えなくてOK）")]
-    public string interstitialAdUnitId = "Interstitial_Android";
-
-    [Header("テストモード（リリース時は false に）")]
-    public bool testMode = true;
+    private string interstitialAdUnitId;
 
     private bool _isInitialized = false;
     private bool _isAdLoaded    = false;
@@ -38,19 +43,36 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
             return;
         }
 
+        StartCoroutine(InitializeUGSCoroutine());
+    }
+
+    IEnumerator InitializeUGSCoroutine()
+    {
+        var initTask = UnityServices.InitializeAsync();
+        yield return new WaitUntil(() => initTask.IsCompleted);
+
+        if (initTask.IsFaulted)
+        {
+            Debug.LogWarning($"[AdsManager] UGS initialization failed: {initTask.Exception?.Message}");
+            yield break;
+        }
+
         InitializeAds();
     }
 
     void InitializeAds()
     {
         string gameId = Application.platform == RuntimePlatform.IPhonePlayer
-            ? gameIdIos
-            : gameIdAndroid;
+            ? GameIdIos
+            : GameIdAndroid;
 
-        // 既に初期化済みなら不要
+        interstitialAdUnitId = Application.platform == RuntimePlatform.IPhonePlayer
+            ? InterstitialAdUnitIdIos
+            : InterstitialAdUnitIdAndroid;
+
         if (Advertisement.isInitialized) { _isInitialized = true; LoadInterstitial(); return; }
 
-        Advertisement.Initialize(gameId, testMode, this);
+        Advertisement.Initialize(gameId, TestMode, this);
     }
 
     // ---- 外部 API ----
@@ -88,9 +110,6 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
     void LoadInterstitial()
     {
         _isAdLoaded = false;
-#if UNITY_IOS
-        interstitialAdUnitId = "Interstitial_iOS";
-#endif
         Advertisement.Load(interstitialAdUnitId, this);
     }
 
@@ -102,7 +121,7 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
 
     public void OnUnityAdsFailedToLoad(string adUnitId, UnityAdsLoadError error, string message)
     {
-        Debug.LogWarning($"[AdsManager] Load failed: {adUnitId} - {error} - {message}");
+        Debug.LogWarning($"[AdsManager] Load failed: {adUnitId} - {message}");
     }
 
     // ---- Show ----
@@ -110,16 +129,15 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
     public void OnUnityAdsShowComplete(string adUnitId, UnityAdsShowCompletionState showCompletionState)
     {
         Debug.Log($"[AdsManager] Show complete: {adUnitId} ({showCompletionState})");
-        // 次回のために再ロード
         LoadInterstitial();
     }
 
     public void OnUnityAdsShowFailure(string adUnitId, UnityAdsShowError error, string message)
     {
-        Debug.LogWarning($"[AdsManager] Show failed: {adUnitId} - {error} - {message}");
+        Debug.LogWarning($"[AdsManager] Show failed: {adUnitId} - {message}");
         LoadInterstitial();
     }
 
-    public void OnUnityAdsShowStart(string adUnitId)     { }
-    public void OnUnityAdsShowClick(string adUnitId)     { }
+    public void OnUnityAdsShowStart(string adUnitId)  { }
+    public void OnUnityAdsShowClick(string adUnitId)  { }
 }

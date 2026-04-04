@@ -87,6 +87,7 @@ public class TowerUI : MonoBehaviour
 
     public void OnRestartButton()
     {
+        AdsManager.Instance?.ShowInterstitial();
         TowerGameManager.Instance?.RestartGame();
     }
 

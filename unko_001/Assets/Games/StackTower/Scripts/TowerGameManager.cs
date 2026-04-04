@@ -92,7 +92,6 @@ public class TowerGameManager : MonoBehaviour
         }
 
         towerUI?.ShowGameOver(Score, best);
-        AdsManager.Instance?.ShowInterstitial();
     }
 
     public void RestartGame()
