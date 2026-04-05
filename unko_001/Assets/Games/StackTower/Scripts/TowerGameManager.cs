@@ -142,6 +142,8 @@ public class TowerGameManager : MonoBehaviour
     {
         blockSpawner?.ClearBlocks();
         StartGame();
+        // カメラを即座に初期位置へスナップ（前のゲームの高さに残らないよう）
+        cameraFollow?.SnapToTarget();
     }
 
     public void BackToTitle()

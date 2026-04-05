@@ -87,8 +87,17 @@ public class BlockSpawner : MonoBehaviour
 
     public void ClearBlocks()
     {
+        isSpawning = false;
+        _useInitialSizeOnce = false;
+
         foreach (var go in _spawnedObjects)
-            if (go != null) Object.Destroy(go);
+        {
+            if (go != null)
+            {
+                go.SetActive(false);   // 即座に非表示にしてから破棄
+                Object.Destroy(go);
+            }
+        }
         _spawnedObjects.Clear();
 
         lastPlacedBlock = null;
@@ -103,6 +112,9 @@ public class BlockSpawner : MonoBehaviour
     {
         if (!isSpawning) return;
         if (currentBlock == null || currentBlock.isDropped) return;
+
+        // 広告表示中は入力を無視
+        if (AdsManager.Instance != null && AdsManager.Instance.IsAdShowing) return;
 
         // Space キー or 画面タップで Drop
         bool dropped = false;

@@ -17,6 +17,15 @@ public class CameraFollow : MonoBehaviour
 
     [HideInInspector] public Vector3 shakeOffset;
 
+    /// <summary>ゲームリセット時にカメラ位置を即スナップする。</summary>
+    public void SnapToTarget()
+    {
+        if (target == null) return;
+        float targetY = target.position.y + offset.y;
+        transform.position = new Vector3(offset.x, targetY, offset.z);
+        transform.LookAt(new Vector3(0f, target.position.y, 0f));
+    }
+
     void LateUpdate()
     {
         if (target == null) return;

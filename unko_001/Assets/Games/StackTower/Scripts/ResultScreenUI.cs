@@ -66,6 +66,13 @@ public class ResultScreenUI : MonoBehaviour
         resultAnimator?.Stop();
         cardLotteryUI?.Hide();
         if (panel != null) panel.SetActive(false);
+
+        // テキストを初期化しておく（次回Show()前に古い値が一瞬見えないよう）
+        if (scoreText    != null) scoreText.text    = "";
+        if (bestText     != null) bestText.text     = "";
+        if (perfectText  != null) perfectText.text  = "";
+        if (maxComboText != null) maxComboText.text = "";
+        if (newBestLabel != null) newBestLabel.gameObject.SetActive(false);
     }
 
     void OnAnimationComplete(ResultData data)

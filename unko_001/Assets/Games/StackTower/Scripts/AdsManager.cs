@@ -36,6 +36,9 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
     private bool _isAdLoaded       = false;
     private bool _isRewardedLoaded = false;
 
+    /// <summary>広告表示中は true。ゲーム側の入力をブロックするために参照する。</summary>
+    public bool IsAdShowing { get; private set; } = false;
+
     // リワード広告完了コールバック
     private Action _onRewardedComplete;
     private Action _onRewardedFailed;
@@ -177,6 +180,7 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
 
     public void OnUnityAdsShowComplete(string adUnitId, UnityAdsShowCompletionState showCompletionState)
     {
+        IsAdShowing = false;
         Debug.Log($"[AdsManager] Show complete: {adUnitId} ({showCompletionState})");
 
         if (adUnitId == rewardedAdUnitId)
@@ -197,6 +201,7 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
 
     public void OnUnityAdsShowFailure(string adUnitId, UnityAdsShowError error, string message)
     {
+        IsAdShowing = false;
         Debug.LogWarning($"[AdsManager] Show failed: {adUnitId} - {message}");
 
         if (adUnitId == rewardedAdUnitId)
@@ -212,6 +217,6 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
         }
     }
 
-    public void OnUnityAdsShowStart(string adUnitId)  { }
+    public void OnUnityAdsShowStart(string adUnitId)  { IsAdShowing = true; }
     public void OnUnityAdsShowClick(string adUnitId)  { }
 }
