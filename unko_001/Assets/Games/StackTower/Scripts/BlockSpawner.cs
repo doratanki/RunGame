@@ -40,6 +40,7 @@ public class BlockSpawner : MonoBehaviour
     private TowerBlock lastPlacedBlock;
     private int colorIndex = 0;
     private bool isSpawning = false;
+    private bool _useInitialSizeOnce = false;
 
     private readonly List<GameObject> _spawnedObjects = new List<GameObject>();
 
@@ -66,9 +67,17 @@ public class BlockSpawner : MonoBehaviour
     {
         isSpawning = false;
         if (currentBlock != null)
-        {
             currentBlock.isDropped = true;
-        }
+    }
+
+    /// <summary>
+    /// コンティニュー時に呼ぶ。現在の塔の高さからブロックを初期サイズで再開する。
+    /// </summary>
+    public void ContinueSpawning()
+    {
+        isSpawning = true;
+        _useInitialSizeOnce = true;
+        SpawnNextBlock();
     }
 
     public void RegisterSpawnedObject(GameObject go)
@@ -175,9 +184,19 @@ public class BlockSpawner : MonoBehaviour
         MoveAxis axis = _nextAxis;
         _nextAxis = axis == MoveAxis.X ? MoveAxis.Z : MoveAxis.X;
 
-        // 前ブロックの幅・奥行を引き継ぐ
-        float w = lastPlacedBlock != null ? lastPlacedBlock.transform.localScale.x : blockWidth;
-        float d = lastPlacedBlock != null ? lastPlacedBlock.transform.localScale.z : blockDepth;
+        // 前ブロックの幅・奥行を引き継ぐ（コンティニュー時は初期サイズに戻す）
+        float w, d;
+        if (_useInitialSizeOnce)
+        {
+            w = blockWidth;
+            d = blockDepth;
+            _useInitialSizeOnce = false;
+        }
+        else
+        {
+            w = lastPlacedBlock != null ? lastPlacedBlock.transform.localScale.x : blockWidth;
+            d = lastPlacedBlock != null ? lastPlacedBlock.transform.localScale.z : blockDepth;
+        }
 
         // 前ブロックの中心位置（固定軸は前ブロックに揃える）
         float prevX = lastPlacedBlock != null ? lastPlacedBlock.transform.position.x : 0f;

@@ -10,7 +10,6 @@ public class TowerUI : MonoBehaviour
     [Header("パネル")]
     public GameObject startPanel;
     public GameObject gamePanel;
-    public GameObject gameOverPanel;
 
     [Header("ゲーム中")]
     public TextMeshProUGUI scoreText;
@@ -19,20 +18,46 @@ public class TowerUI : MonoBehaviour
     public ComboUIAnimator goodAnimator;
     public ComboUIAnimator badAnimator;
 
-    [Header("ゲームオーバー")]
-    public TextMeshProUGUI gameOverScoreText;
-    public TextMeshProUGUI gameOverBestText;
+    [Header("コンティニュー")]
+    public ContinueDialog continueDialog;
+
+    [Header("リザルト")]
+    public ResultScreenUI resultScreen;
+
+    [Header("ギャラリー")]
+    public GalleryUI galleryUI;
+
+    [Header("広告削除")]
+    public RemoveAdsDialog removeAdsDialog;
 
     public void ShowMenu()
     {
-        SetPanels(start: true, game: false, gameOver: false);
+        if (startPanel != null) startPanel.SetActive(true);
+        if (gamePanel  != null) gamePanel.SetActive(false);
+        continueDialog?.Hide();
+        resultScreen?.Hide();
+        galleryUI?.Hide();
     }
 
     public void ShowGame(int score)
     {
-        SetPanels(start: false, game: true, gameOver: false);
+        if (startPanel != null) startPanel.SetActive(false);
+        if (gamePanel  != null) gamePanel.SetActive(true);
+        continueDialog?.Hide();
+        resultScreen?.Hide();
         UpdateScore(score);
         if (comboText != null) comboText.text = "";
+    }
+
+    public void ShowContinueDialog()
+    {
+        int score = TowerGameManager.Instance != null ? TowerGameManager.Instance.Score : 0;
+        continueDialog?.Show(score);
+    }
+
+    public void HideContinueDialog()
+    {
+        continueDialog?.Hide();
     }
 
     public void UpdateScore(int score)
@@ -60,25 +85,40 @@ public class TowerUI : MonoBehaviour
         }
     }
 
-    public void ShowGameOver(int score, int best)
+    public void ShowGameOver(int score, int best, int perfectCount, int maxCombo)
     {
-        SetPanels(start: false, game: false, gameOver: true);
+        if (startPanel != null) startPanel.SetActive(false);
+        if (gamePanel  != null) gamePanel.SetActive(false);
 
-        if (gameOverScoreText != null)
-            gameOverScoreText.text = "SCORE  " + score;
-
-        if (gameOverBestText != null)
-            gameOverBestText.text = "BEST   " + best;
-    }
-
-    void SetPanels(bool start, bool game, bool gameOver)
-    {
-        if (startPanel   != null) startPanel.SetActive(start);
-        if (gamePanel    != null) gamePanel.SetActive(game);
-        if (gameOverPanel != null) gameOverPanel.SetActive(gameOver);
+        var data = new ResultData
+        {
+            Score        = score,
+            BestScore    = best,
+            PerfectCount = perfectCount,
+            MaxCombo     = maxCombo,
+            IsNewBest    = score >= best,
+        };
+        resultScreen?.Show(data);
     }
 
     // ---- ボタンから呼ぶメソッド ----
+
+    public void OnRemoveAdsButton()
+    {
+        removeAdsDialog?.Show();
+    }
+
+    public void OnGalleryButton()
+    {
+        galleryUI?.Show();
+        if (startPanel != null) startPanel.SetActive(false);
+    }
+
+    public void OnGalleryCloseButton()
+    {
+        galleryUI?.Hide();
+        if (startPanel != null) startPanel.SetActive(true);
+    }
 
     public void OnStartButton()
     {

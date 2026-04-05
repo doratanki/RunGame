@@ -4,6 +4,7 @@ using Unity.Services.Core;
 using UnityEngine;
 using UnityEngine.Advertisements;
 
+
 /// <summary>
 /// Unity Ads (UGS) を管理するシングルトン。
 /// TowerGameManager と同じ GameObject にアタッチする。
@@ -24,12 +25,20 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
     private const string GameIdAndroid = "6082459";
     private const string InterstitialAdUnitIdIos     = "Interstitial_iOS";
     private const string InterstitialAdUnitIdAndroid = "Interstitial_Android";
+    private const string RewardedAdUnitIdIos         = "Rewarded_iOS";
+    private const string RewardedAdUnitIdAndroid     = "Rewarded_Android";
     private const bool   TestMode = true;
 
     private string interstitialAdUnitId;
+    private string rewardedAdUnitId;
 
-    private bool _isInitialized = false;
-    private bool _isAdLoaded    = false;
+    private bool _isInitialized    = false;
+    private bool _isAdLoaded       = false;
+    private bool _isRewardedLoaded = false;
+
+    // リワード広告完了コールバック
+    private Action _onRewardedComplete;
+    private Action _onRewardedFailed;
 
     // ---- ライフサイクル ----
 
@@ -70,7 +79,11 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
             ? InterstitialAdUnitIdIos
             : InterstitialAdUnitIdAndroid;
 
-        if (Advertisement.isInitialized) { _isInitialized = true; LoadInterstitial(); return; }
+        rewardedAdUnitId = Application.platform == RuntimePlatform.IPhonePlayer
+            ? RewardedAdUnitIdIos
+            : RewardedAdUnitIdAndroid;
+
+        if (Advertisement.isInitialized) { _isInitialized = true; LoadInterstitial(); LoadRewarded(); return; }
 
         Advertisement.Initialize(gameId, TestMode, this);
     }
@@ -82,6 +95,13 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
     /// </summary>
     public void ShowInterstitial()
     {
+        // 広告削除購入済みの場合はスキップ
+        if (IAPManager.Instance != null && IAPManager.Instance.IsRemoveAdsPurchased)
+        {
+            Debug.Log("[AdsManager] Ads removed by purchase. Skipping.");
+            return;
+        }
+
         if (!_isInitialized || !_isAdLoaded)
         {
             Debug.Log("[AdsManager] Ad not ready yet.");
@@ -93,11 +113,31 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
 
     // ---- IUnityAdsInitializationListener ----
 
+    /// <summary>
+    /// リワード広告を表示する。
+    /// 視聴完了で onComplete、スキップ・失敗で onFailed を呼ぶ。
+    /// </summary>
+    public void ShowRewarded(Action onComplete, Action onFailed = null)
+    {
+        if (!_isInitialized || !_isRewardedLoaded)
+        {
+            Debug.LogWarning("[AdsManager] Rewarded ad not ready.");
+            onFailed?.Invoke();
+            return;
+        }
+        _onRewardedComplete = onComplete;
+        _onRewardedFailed   = onFailed;
+        Advertisement.Show(rewardedAdUnitId, this);
+    }
+
+    public bool IsRewardedReady => _isInitialized && _isRewardedLoaded;
+
     public void OnInitializationComplete()
     {
         Debug.Log("[AdsManager] Initialized.");
         _isInitialized = true;
         LoadInterstitial();
+        LoadRewarded();
     }
 
     public void OnInitializationFailed(UnityAdsInitializationError error, string message)
@@ -113,10 +153,19 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
         Advertisement.Load(interstitialAdUnitId, this);
     }
 
+    void LoadRewarded()
+    {
+        _isRewardedLoaded = false;
+        Advertisement.Load(rewardedAdUnitId, this);
+    }
+
     public void OnUnityAdsAdLoaded(string adUnitId)
     {
         Debug.Log($"[AdsManager] Ad loaded: {adUnitId}");
-        _isAdLoaded = true;
+        if (adUnitId == rewardedAdUnitId)
+            _isRewardedLoaded = true;
+        else
+            _isAdLoaded = true;
     }
 
     public void OnUnityAdsFailedToLoad(string adUnitId, UnityAdsLoadError error, string message)
@@ -129,13 +178,38 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
     public void OnUnityAdsShowComplete(string adUnitId, UnityAdsShowCompletionState showCompletionState)
     {
         Debug.Log($"[AdsManager] Show complete: {adUnitId} ({showCompletionState})");
-        LoadInterstitial();
+
+        if (adUnitId == rewardedAdUnitId)
+        {
+            LoadRewarded();
+            if (showCompletionState == UnityAdsShowCompletionState.COMPLETED)
+                _onRewardedComplete?.Invoke();
+            else
+                _onRewardedFailed?.Invoke();
+            _onRewardedComplete = null;
+            _onRewardedFailed   = null;
+        }
+        else
+        {
+            LoadInterstitial();
+        }
     }
 
     public void OnUnityAdsShowFailure(string adUnitId, UnityAdsShowError error, string message)
     {
         Debug.LogWarning($"[AdsManager] Show failed: {adUnitId} - {message}");
-        LoadInterstitial();
+
+        if (adUnitId == rewardedAdUnitId)
+        {
+            LoadRewarded();
+            _onRewardedFailed?.Invoke();
+            _onRewardedComplete = null;
+            _onRewardedFailed   = null;
+        }
+        else
+        {
+            LoadInterstitial();
+        }
     }
 
     public void OnUnityAdsShowStart(string adUnitId)  { }

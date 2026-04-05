@@ -18,6 +18,10 @@ public class TowerGameManager : MonoBehaviour
 
     public int Score { get; private set; } = 0;
     public int ComboCount { get; private set; } = 0;
+    public int PerfectCount { get; private set; } = 0;
+    public int MaxCombo { get; private set; } = 0;
+
+    public bool HasContinued { get; private set; } = false;
 
     private const string BestScoreKey = "TexasMeatTower_BestScore";
 
@@ -40,6 +44,9 @@ public class TowerGameManager : MonoBehaviour
     {
         Score = 0;
         ComboCount = 0;
+        PerfectCount = 0;
+        MaxCombo = 0;
+        HasContinued = false;
         State = GameState.Playing;
         towerUI?.ShowGame(Score);
         blockSpawner?.StartSpawning();
@@ -54,7 +61,11 @@ public class TowerGameManager : MonoBehaviour
         if (State != GameState.Playing) return;
 
         if (quality == PlacementQuality.Perfect)
+        {
             ComboCount++;
+            PerfectCount++;
+            if (ComboCount > MaxCombo) MaxCombo = ComboCount;
+        }
         else
             ComboCount = 0;
 
@@ -83,6 +94,39 @@ public class TowerGameManager : MonoBehaviour
         TowerAudioManager.Instance?.PlayGameOver();
         blockSpawner?.StopSpawning();
 
+        // コンティニューがまだ使われていなければ 30% の確率でダイアログを出す
+        if (!HasContinued && Random.value < 0.3f)
+        {
+            towerUI?.ShowContinueDialog();
+            return;
+        }
+
+        ShowResult();
+    }
+
+    /// <summary>コンティニューダイアログで「続ける」を選んだ時に呼ぶ。</summary>
+    public void ContinueGame()
+    {
+        if (HasContinued) return;
+        HasContinued = true;
+        State = GameState.Playing;
+
+        towerUI?.HideContinueDialog();
+        blockSpawner?.ContinueSpawning();
+
+        if (cameraFollow != null && blockSpawner != null)
+            cameraFollow.target = blockSpawner.topBlockTransform;
+    }
+
+    /// <summary>コンティニューダイアログで「あきらめる」を選んだ時に呼ぶ。</summary>
+    public void GiveUp()
+    {
+        HasContinued = true; // 使用済みにして直接リザルトへ
+        ShowResult();
+    }
+
+    void ShowResult()
+    {
         int best = PlayerPrefs.GetInt(BestScoreKey, 0);
         if (Score > best)
         {
@@ -91,7 +135,7 @@ public class TowerGameManager : MonoBehaviour
             PlayerPrefs.Save();
         }
 
-        towerUI?.ShowGameOver(Score, best);
+        towerUI?.ShowGameOver(Score, best, PerfectCount, MaxCombo);
     }
 
     public void RestartGame()
