@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d379703eb4eb491e87d619fa93460f4, type: 3}
+  m_Name: CardLotteryTable
+  m_EditorClassIdentifier: Assembly-CSharp::CardLotteryTable
+  entries:
+  - rankLabel: E
+    rates:
+    - rarity: 0
+      weight: 97
+    - rarity: 1
+      weight: 3
+  - rankLabel: D
+    rates:
+    - rarity: 0
+      weight: 90
+    - rarity: 1
+      weight: 10
+  - rankLabel: C
+    rates:
+    - rarity: 0
+      weight: 75
+    - rarity: 1
+      weight: 23
+    - rarity: 2
+      weight: 2
+  - rankLabel: B
+    rates:
+    - rarity: 0
+      weight: 60
+    - rarity: 1
+      weight: 33
+    - rarity: 2
+      weight: 7
+  - rankLabel: A
+    rates:
+    - rarity: 0
+      weight: 40
+    - rarity: 1
+      weight: 40
+    - rarity: 2
+      weight: 18
+    - rarity: 3
+      weight: 2
+  - rankLabel: S
+    rates:
+    - rarity: 1
+      weight: 50
+    - rarity: 2
+      weight: 40
+    - rarity: 3
+      weight: 10
+  - rankLabel: SS
+    rates:
+    - rarity: 1
+      weight: 25
+    - rarity: 2
+      weight: 50
+    - rarity: 3
+      weight: 25
+  - rankLabel: SSS
+    rates:
+    - rarity: 2
+      weight: 30
+    - rarity: 3
+      weight: 70

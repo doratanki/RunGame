@@ -11,7 +11,9 @@
       "Bash(sudo chmod:*)",
       "Bash(/opt/homebrew/Cellar/cocoapods/1.16.2_2/libexec/bin/pod --version)",
       "Read(//opt/homebrew/lib/ruby/gems/**)",
-      "Bash(/opt/homebrew/opt/ruby/bin/gem env:*)"
+      "Bash(/opt/homebrew/opt/ruby/bin/gem env:*)",
+      "mcp__unity__Unity_EditorWindow_CaptureScreenshot",
+      "mcp__unity__Unity_SceneView_CaptureMultiAngleSceneView"
     ],
     "additionalDirectories": [
       "/Users/aoyagitoshihiko"
