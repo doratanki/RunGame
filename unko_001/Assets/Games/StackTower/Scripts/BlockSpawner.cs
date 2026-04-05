@@ -78,6 +78,9 @@ public class BlockSpawner : MonoBehaviour
         isSpawning = true;
         _useInitialSizeOnce = true;
         SpawnNextBlock();
+        // Mark the first block after continue — it gets a grace placement (no cut on non-miss)
+        if (currentBlock != null)
+            currentBlock.isFirstAfterContinue = true;
     }
 
     public void RegisterSpawnedObject(GameObject go)

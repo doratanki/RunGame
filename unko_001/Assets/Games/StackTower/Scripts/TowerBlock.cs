@@ -12,6 +12,8 @@ public class TowerBlock : MonoBehaviour
     [HideInInspector] public TowerBlock previousBlock; // Previous block (null = foundation)
 
     [HideInInspector] public bool isDropped = false;
+    /// <summary>True for the first block placed after a continue. Skips cutting if the block isn't a complete miss.</summary>
+    [HideInInspector] public bool isFirstAfterContinue = false;
 
     // Movement parameters (set by BlockSpawner)
     public float moveSpeed = 3f;
@@ -124,6 +126,18 @@ public class TowerBlock : MonoBehaviour
             SpawnDebris(currCenter, currSize, isX);
             gameObject.SetActive(false);
             TowerGameManager.Instance?.OnGameOver();
+            return;
+        }
+
+        // Grace placement after continue: skip cutting, snap to previous center
+        if (isFirstAfterContinue)
+        {
+            HapticManager.TriggerLight();
+            if (isX)
+                transform.position = new Vector3(prevCenter, transform.position.y, transform.position.z);
+            else
+                transform.position = new Vector3(transform.position.x, transform.position.y, prevCenter);
+            spawner.OnBlockPlaced(this, PlacementQuality.Good);
             return;
         }
 
