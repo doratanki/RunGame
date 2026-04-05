@@ -4,21 +4,21 @@ using UnityEngine.Purchasing;
 using UnityEngine.Purchasing.Extension;
 
 /// <summary>
-/// Unity IAP による買い切り「広告削除」購入を管理するシングルトン。
+/// Singleton that manages the one-time "Remove Ads" purchase via Unity IAP.
 ///
-/// 必要パッケージ:
+/// Required package:
 ///   - com.unity.purchasing (Unity IAP 4.x)
 ///     Window > Package Manager > Unity Registry > In App Purchasing
 ///
-/// ストア設定:
-///   - iOS  : App Store Connect でアプリ内課金を登録し ProductId を合わせる
-///   - Android : Google Play Console でアプリ内アイテムを登録し ProductId を合わせる
+/// Store setup:
+///   - iOS  : Register an in-app purchase in App Store Connect and match the ProductId
+///   - Android : Register an in-app item in Google Play Console and match the ProductId
 /// </summary>
 public class IAPManager : MonoBehaviour, IDetailedStoreListener
 {
     public static IAPManager Instance { get; private set; }
 
-    // ▼ App Store / Google Play 双方で同じ Product ID を使う（ストア側と一致させること）
+    // Use the same Product ID on both App Store and Google Play (must match the store entries)
     public const string ProductIdRemoveAds = "com.yourstudio.stacktower.removeads";
 
     private const string PrefsPurchasedKey = "RemoveAdsPurchased";
@@ -29,12 +29,12 @@ public class IAPManager : MonoBehaviour, IDetailedStoreListener
     public bool IsRemoveAdsPurchased =>
         PlayerPrefs.GetInt(PrefsPurchasedKey, 0) == 1;
 
-    // 購入完了・復元完了を通知するイベント
+    // Events fired on purchase complete, restore complete, and purchase failure
     public event Action         OnPurchaseSuccess;
     public event Action         OnRestoreSuccess;
     public event Action<string> OnPurchaseFailedEvent;
 
-    // ---- ライフサイクル ----
+    // ---- Lifecycle ----
 
     void Awake()
     {
@@ -56,21 +56,21 @@ public class IAPManager : MonoBehaviour, IDetailedStoreListener
         UnityPurchasing.Initialize(this, builder);
     }
 
-    // ---- 外部 API ----
+    // ---- Public API ----
 
-    /// <summary>広告削除を購入する。</summary>
+    /// <summary>Purchase the Remove Ads product.</summary>
     public void BuyRemoveAds()
     {
         if (_controller == null)
         {
-            OnPurchaseFailedEvent?.Invoke("ストアの初期化が完了していません。");
+            OnPurchaseFailedEvent?.Invoke("Store is not initialized yet.");
             return;
         }
         _controller.InitiatePurchase(ProductIdRemoveAds);
     }
 
     /// <summary>
-    /// 購入履歴を復元する（iOS 必須、Android は自動復元されるが念のため用意）。
+    /// Restore past purchases (required on iOS; Android restores automatically but provided for completeness).
     /// </summary>
     public void RestorePurchases()
     {
@@ -88,13 +88,13 @@ public class IAPManager : MonoBehaviour, IDetailedStoreListener
             else
             {
                 Debug.LogWarning($"[IAP] Restore failed: {error}");
-                OnPurchaseFailedEvent?.Invoke("購入の復元に失敗しました。");
+                OnPurchaseFailedEvent?.Invoke("Failed to restore purchases.");
             }
         });
 #else
-        // Android は OnInitialized 時に自動復元されるためここでは通知のみ
+        // Android restores automatically on OnInitialized; just notify here
         if (IsRemoveAdsPurchased) OnRestoreSuccess?.Invoke();
-        else OnPurchaseFailedEvent?.Invoke("復元できる購入履歴が見つかりません。");
+        else OnPurchaseFailedEvent?.Invoke("No restorable purchases found.");
 #endif
     }
 
@@ -106,7 +106,7 @@ public class IAPManager : MonoBehaviour, IDetailedStoreListener
         _controller = controller;
         _extensions = extensions;
 
-        // 購入済みなら PlayerPrefs に反映（アンインストール後の復元対応）
+        // Reflect purchase in PlayerPrefs if already owned (supports post-uninstall restore)
         var product = controller.products.WithID(ProductIdRemoveAds);
         if (product != null && product.hasReceipt)
             SetPurchased();
@@ -135,19 +135,19 @@ public class IAPManager : MonoBehaviour, IDetailedStoreListener
 
     public void OnPurchaseFailed(Product product, PurchaseFailureReason failureReason)
     {
-        string msg = $"購入失敗: {failureReason}";
+        string msg = $"Purchase failed: {failureReason}";
         Debug.LogWarning($"[IAP] {msg}");
         OnPurchaseFailedEvent?.Invoke(msg);
     }
 
     public void OnPurchaseFailed(Product product, PurchaseFailureDescription failureDescription)
     {
-        string msg = $"購入失敗: {failureDescription.message}";
+        string msg = $"Purchase failed: {failureDescription.message}";
         Debug.LogWarning($"[IAP] {msg}");
         OnPurchaseFailedEvent?.Invoke(msg);
     }
 
-    // ---- 内部 ----
+    // ---- Internal ----
 
     void SetPurchased()
     {

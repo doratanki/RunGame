@@ -4,8 +4,8 @@ using System.Runtime.InteropServices;
 #endif
 
 /// <summary>
-/// ハプティクス（バイブ）管理クラス。
-/// HapticManager.TriggerLight() を呼ぶだけで最短バイブが発生する。
+/// Haptic feedback manager.
+/// Call HapticManager.TriggerLight() to trigger a short vibration.
 /// </summary>
 public static class HapticManager
 {
@@ -31,7 +31,7 @@ public static class HapticManager
             UnityEngine.Debug.LogWarning($"[HapticManager] Android haptic failed: {e.Message}");
         }
 #else
-        // Editor では何もしない
+        // No-op in Editor
 #endif
     }
 }

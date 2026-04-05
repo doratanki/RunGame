@@ -3,25 +3,25 @@ using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// 広告削除購入ダイアログ。
-/// 購入済みの場合は購入ボタンを非表示にして「購入済み」を表示する。
+/// Purchase dialog for removing ads.
+/// Shows a "purchased" state if already bought.
 /// </summary>
 public class RemoveAdsDialog : MonoBehaviour
 {
-    [Header("パネル")]
+    [Header("Panel")]
     public GameObject panel;
 
-    [Header("状態別表示")]
-    public GameObject unpurchasedView;  // 未購入時に表示するコンテンツ
-    public GameObject purchasedView;    // 購入済み時に表示するコンテンツ
+    [Header("State Views")]
+    public GameObject unpurchasedView;  // Content shown before purchase
+    public GameObject purchasedView;    // Content shown after purchase
 
-    [Header("ボタン")]
+    [Header("Buttons")]
     public Button purchaseButton;
-    public Button restoreButton;    // iOS 審査要件。Android では省略可
+    public Button restoreButton;    // Required for iOS review. Optional on Android.
     public Button closeButton;
 
-    [Header("テキスト")]
-    public TextMeshProUGUI statusText;  // エラーや処理中メッセージ
+    [Header("Text")]
+    public TextMeshProUGUI statusText;  // Error or processing messages
 
     void OnEnable()
     {
@@ -54,25 +54,25 @@ public class RemoveAdsDialog : MonoBehaviour
         if (panel != null) panel.SetActive(false);
     }
 
-    // ---- ボタン OnClick ----
+    // ---- Button OnClick ----
 
     public void OnPurchaseButton()
     {
-        SetStatus("処理中...");
+        SetStatus("Processing...");
         SetButtonsInteractable(false);
         IAPManager.Instance?.BuyRemoveAds();
     }
 
     public void OnRestoreButton()
     {
-        SetStatus("復元中...");
+        SetStatus("Restoring...");
         SetButtonsInteractable(false);
         IAPManager.Instance?.RestorePurchases();
     }
 
     public void OnCloseButton() => Hide();
 
-    // ---- イベントハンドラ ----
+    // ---- Event handlers ----
 
     void HandlePurchaseSuccess()
     {
@@ -83,7 +83,7 @@ public class RemoveAdsDialog : MonoBehaviour
     void HandleRestoreSuccess()
     {
         Refresh();
-        SetStatus("購入履歴を復元しました。");
+        SetStatus("Purchase restored successfully.");
     }
 
     void HandlePurchaseFailed(string message)
@@ -92,7 +92,7 @@ public class RemoveAdsDialog : MonoBehaviour
         SetButtonsInteractable(true);
     }
 
-    // ---- 内部 ----
+    // ---- Internal ----
 
     void Refresh()
     {

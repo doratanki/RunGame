@@ -2,32 +2,32 @@ using UnityEngine;
 using TMPro;
 
 /// <summary>
-/// Stack Tower の UI を管理する。
-/// Inspector で各パネル・テキストをアサインする。
+/// Manages the Stack Tower UI.
+/// Assign each panel and text in the Inspector.
 /// </summary>
 public class TowerUI : MonoBehaviour
 {
-    [Header("パネル")]
+    [Header("Panels")]
     public GameObject startPanel;
     public GameObject gamePanel;
 
-    [Header("ゲーム中")]
+    [Header("In-Game")]
     public TextMeshProUGUI scoreText;
     public TextMeshProUGUI comboText;
     public ComboUIAnimator perfectAnimator;
     public ComboUIAnimator goodAnimator;
     public ComboUIAnimator badAnimator;
 
-    [Header("コンティニュー")]
+    [Header("Continue")]
     public ContinueDialog continueDialog;
 
-    [Header("リザルト")]
+    [Header("Result")]
     public ResultScreenUI resultScreen;
 
-    [Header("ギャラリー")]
+    [Header("Gallery")]
     public GalleryUI galleryUI;
 
-    [Header("広告削除")]
+    [Header("Remove Ads")]
     public RemoveAdsDialog removeAdsDialog;
 
     public void ShowMenu()
@@ -101,7 +101,7 @@ public class TowerUI : MonoBehaviour
         resultScreen?.Show(data);
     }
 
-    // ---- ボタンから呼ぶメソッド ----
+    // ---- Button callbacks ----
 
     public void OnRemoveAdsButton()
     {

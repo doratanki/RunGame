@@ -3,14 +3,14 @@ using UnityEngine;
 using TMPro;
 
 /// <summary>
-/// PERFECT! ポップアップのフェードアウトアニメを管理する。
-/// TowerUI から PlayPerfect() を呼ぶだけで動作する。
+/// Manages the PERFECT! popup fade-out animation.
+/// Call PlayPerfect() from TowerUI to trigger it.
 /// </summary>
 public class ComboUIAnimator : MonoBehaviour
 {
     public TextMeshProUGUI perfectText;
 
-    [Header("タイミング")]
+    [Header("Timing")]
     public float displayDuration = 0.6f;
     public float fadeDuration    = 0.4f;
 

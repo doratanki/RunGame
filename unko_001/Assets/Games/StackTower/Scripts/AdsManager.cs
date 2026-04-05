@@ -6,14 +6,14 @@ using UnityEngine.Advertisements;
 
 
 /// <summary>
-/// Unity Ads (UGS) を管理するシングルトン。
-/// TowerGameManager と同じ GameObject にアタッチする。
+/// Manages Unity Ads (UGS) as a singleton.
+/// Attach to the same GameObject as TowerGameManager.
 ///
-/// 使い方:
-///   1. Inspector で gameIdIos / gameIdAndroid を設定
-///   2. TowerGameManager.OnGameOver() の末尾で AdsManager.Instance?.ShowInterstitial() を呼ぶ
+/// Usage:
+///   1. Set gameIdIos / gameIdAndroid in the Inspector
+///   2. Call AdsManager.Instance?.ShowInterstitial() at the end of TowerGameManager.OnGameOver()
 ///
-/// 必要パッケージ:
+/// Required packages:
 ///   - com.unity.services.core
 ///   - com.unity.ads (4.x)
 /// </summary>
@@ -36,14 +36,14 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
     private bool _isAdLoaded       = false;
     private bool _isRewardedLoaded = false;
 
-    /// <summary>広告表示中は true。ゲーム側の入力をブロックするために参照する。</summary>
+    /// <summary>True while an ad is showing. Use this to block game input.</summary>
     public bool IsAdShowing { get; private set; } = false;
 
-    // リワード広告完了コールバック
+    // Rewarded ad completion callbacks
     private Action _onRewardedComplete;
     private Action _onRewardedFailed;
 
-    // ---- ライフサイクル ----
+    // ---- Lifecycle ----
 
     void Awake()
     {
@@ -91,14 +91,14 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
         Advertisement.Initialize(gameId, TestMode, this);
     }
 
-    // ---- 外部 API ----
+    // ---- Public API ----
 
     /// <summary>
-    /// ゲームオーバー時などに呼ぶ。ロード済みなら即表示、未ロードなら次回ゲームオーバーで表示。
+    /// Call on game over etc. Shows immediately if loaded, otherwise skips until the next call.
     /// </summary>
     public void ShowInterstitial()
     {
-        // 広告削除購入済みの場合はスキップ
+        // Skip if ads have been removed by purchase
         if (IAPManager.Instance != null && IAPManager.Instance.IsRemoveAdsPurchased)
         {
             Debug.Log("[AdsManager] Ads removed by purchase. Skipping.");
@@ -117,8 +117,8 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
     // ---- IUnityAdsInitializationListener ----
 
     /// <summary>
-    /// リワード広告を表示する。
-    /// 視聴完了で onComplete、スキップ・失敗で onFailed を呼ぶ。
+    /// Show a rewarded ad.
+    /// Calls onComplete on full view, onFailed on skip or failure.
     /// </summary>
     public void ShowRewarded(Action onComplete, Action onFailed = null)
     {

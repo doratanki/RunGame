@@ -4,24 +4,24 @@ using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// コンティニューダイアログ。
-/// カウントダウン中に「続ける」か「あきらめる」を選ぶ。
-/// 時間切れは自動的に GiveUp 扱い。
+/// Continue dialog.
+/// The player chooses to continue or give up during the countdown.
+/// Time-out is treated as a give-up automatically.
 /// </summary>
 public class ContinueDialog : MonoBehaviour
 {
-    [Header("パネル")]
+    [Header("Panel")]
     public GameObject panel;
 
-    [Header("テキスト")]
+    [Header("Text")]
     public TextMeshProUGUI countdownText;
     public TextMeshProUGUI scoreText;
 
-    [Header("ボタン")]
+    [Header("Buttons")]
     public Button continueButton;
     public Button giveUpButton;
 
-    [Tooltip("カウントダウン秒数。0 以下でカウントダウンなし")]
+    [Tooltip("Countdown duration in seconds. No countdown if 0 or less.")]
     public float countdownSeconds = 5f;
 
     Coroutine _countdown;
@@ -51,11 +51,11 @@ public class ContinueDialog : MonoBehaviour
         if (panel != null) panel.SetActive(false);
     }
 
-    // ---- ボタン OnClick ----
+    // ---- Button OnClick ----
 
     public void OnContinueButton()
     {
-        // カウントダウンを止めて広告を待つ間は操作不可に
+        // Stop countdown and disable buttons while waiting for the ad
         if (_countdown != null)
         {
             StopCoroutine(_countdown);
@@ -63,7 +63,7 @@ public class ContinueDialog : MonoBehaviour
         }
         SetButtonsInteractable(false);
 
-        // 課金済みなら広告なしでそのままコンティニュー
+        // Skip the ad if ads have been removed by purchase
         if (IAPManager.Instance != null && IAPManager.Instance.IsRemoveAdsPurchased)
         {
             Hide();
@@ -79,7 +79,7 @@ public class ContinueDialog : MonoBehaviour
             },
             onFailed: () =>
             {
-                // 広告をスキップ・失敗した場合は再度選択させる
+                // Let the player choose again if the ad was skipped or failed
                 SetButtonsInteractable(true);
                 if (countdownSeconds > 0f)
                     _countdown = StartCoroutine(RunCountdown());
@@ -93,7 +93,7 @@ public class ContinueDialog : MonoBehaviour
         TowerGameManager.Instance?.GiveUp();
     }
 
-    // ---- カウントダウン ----
+    // ---- Countdown ----
 
     IEnumerator RunCountdown()
     {
@@ -109,7 +109,7 @@ public class ContinueDialog : MonoBehaviour
             yield return null;
         }
 
-        // 時間切れ → あきらめる
+        // Time-out → give up
         if (countdownText != null)
             countdownText.text = "0";
 

@@ -2,9 +2,9 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// Stack Tower の BGM / SE を管理する。
-/// TowerGameManager と同じ GameObject にアタッチする。
-/// Inspector で各 AudioClip をアサインする。
+/// Manages BGM and SFX for Stack Tower.
+/// Attach to the same GameObject as TowerGameManager.
+/// Assign each AudioClip in the Inspector.
 /// </summary>
 public class TowerAudioManager : MonoBehaviour
 {
@@ -15,10 +15,10 @@ public class TowerAudioManager : MonoBehaviour
     [Range(0f, 1f)] public float bgmVolume = 0.6f;
     public float bgmFadeDuration = 1f;
 
-    [Header("SE")]
-    public AudioClip blockPlaceSE;   // 通常設置
-    public AudioClip perfectSE;      // パーフェクト
-    public AudioClip gameOverSE;     // ゲームオーバー
+    [Header("SFX")]
+    public AudioClip blockPlaceSE;   // Normal placement
+    public AudioClip perfectSE;      // Perfect placement
+    public AudioClip gameOverSE;     // Game over
 
     [Range(0f, 1f)] public float seVolume = 1f;
 
@@ -35,13 +35,13 @@ public class TowerAudioManager : MonoBehaviour
             return;
         }
 
-        // BGM 用 AudioSource
+        // AudioSource for BGM
         _bgmSource = gameObject.AddComponent<AudioSource>();
         _bgmSource.loop = true;
         _bgmSource.playOnAwake = false;
         _bgmSource.volume = bgmVolume;
 
-        // SE 用 AudioSource
+        // AudioSource for SFX
         _seSource = gameObject.AddComponent<AudioSource>();
         _seSource.loop = false;
         _seSource.playOnAwake = false;
@@ -78,7 +78,7 @@ public class TowerAudioManager : MonoBehaviour
         if (stopOnComplete) _bgmSource.Stop();
     }
 
-    // ---- SE ----
+    // ---- SFX ----
 
     public void PlayBlockPlace()  => PlaySE(blockPlaceSE);
     public void PlayPerfect()     => PlaySE(perfectSE);

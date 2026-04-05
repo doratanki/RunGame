@@ -1,11 +1,11 @@
 /// <summary>
-/// スコア → ランク変換の純粋ロジック。MonoBehaviour 不要。
+/// Pure logic for score → rank conversion. No MonoBehaviour required.
 /// </summary>
 public static class RankCalculator
 {
     /// <summary>
-    /// score に対応する RankEntry を返す。
-    /// entries が昇順前提。該当なければ先頭（最低ランク）を返す。
+    /// Returns the RankEntry corresponding to the given score.
+    /// Assumes entries are in ascending order. Returns the first entry (lowest rank) if none match.
     /// </summary>
     public static RankEntry GetRank(RankTable table, int score)
     {
@@ -24,7 +24,7 @@ public static class RankCalculator
     }
 
     /// <summary>
-    /// 現在のスコアの次のランクを返す。最高ランクなら null。
+    /// Returns the next rank above the current score. Returns null if already at the highest rank.
     /// </summary>
     public static RankEntry GetNextRank(RankTable table, int score)
     {

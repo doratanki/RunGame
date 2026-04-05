@@ -2,13 +2,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// カード抽選の純粋ロジック。MonoBehaviour 不要。
+/// Pure card lottery logic. No MonoBehaviour required.
 /// </summary>
 public static class CardLottery
 {
     /// <summary>
-    /// ランクに基づいてカードを1枚抽選する。
-    /// 重複当選は起こりうる（isNew = false で返す）。
+    /// Draws one card based on the given rank.
+    /// Duplicate draws can occur (returned with isNew = false).
     /// </summary>
     public static CardLotteryResult Draw(CardLotteryTable lotteryTable, CardPool pool, string rankLabel)
     {
@@ -19,17 +19,17 @@ public static class CardLottery
         if (entry == null || entry.rates.Count == 0)
             return default;
 
-        // レアリティを重み付き抽選で決定
+        // Determine rarity via weighted random
         CardRarity rarity = PickRarity(entry.rates);
 
-        // そのレアリティのカード一覧から1枚抽選
+        // Draw one card from those matching the rarity
         var candidates = pool.GetByRarity(rarity);
         if (candidates.Count == 0)
             return default;
 
         CardData drawn = candidates[Random.Range(0, candidates.Count)];
 
-        // 所持済み判定（重複当選はするが所持はしない）
+        // Check ownership (duplicates are drawn but not re-added)
         bool isNew = !CardOwnership.IsOwned(drawn.cardId);
         if (isNew)
             CardOwnership.Add(drawn.cardId);

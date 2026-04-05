@@ -2,29 +2,29 @@ using UnityEngine;
 using TMPro;
 
 /// <summary>
-/// リザルト画面の表示を管理するクラス。
-/// ResultAnimator でカウントアップ・ランク遷移演出を駆動する。
+/// Manages the result screen display.
+/// Drives the count-up and rank transition animation via ResultAnimator.
 /// </summary>
 public class ResultScreenUI : MonoBehaviour
 {
-    [Header("パネル")]
+    [Header("Panel")]
     public GameObject panel;
 
-    [Header("テキスト")]
+    [Header("Text")]
     public TextMeshProUGUI scoreText;
     public TextMeshProUGUI bestText;
     public TextMeshProUGUI perfectText;
     public TextMeshProUGUI maxComboText;
     public TextMeshProUGUI newBestLabel;
 
-    [Header("ランク")]
+    [Header("Rank")]
     public RankDisplayUI rankDisplay;
     public RankTable     rankTable;
 
-    [Header("演出")]
+    [Header("Animation")]
     public ResultAnimator resultAnimator;
 
-    [Header("カード抽選")]
+    [Header("Card Lottery")]
     public CardLotteryTable lotteryTable;
     public CardPool         cardPool;
     public CardLotteryUI    cardLotteryUI;
@@ -34,13 +34,13 @@ public class ResultScreenUI : MonoBehaviour
         if (panel != null) panel.SetActive(true);
         cardLotteryUI?.Hide();
 
-        // 静的テキストは即時反映
+        // Static text updates immediately
         if (bestText     != null) bestText.text     = "BEST       " + data.BestScore;
         if (perfectText  != null) perfectText.text  = "PERFECT    " + data.PerfectCount;
         if (maxComboText != null) maxComboText.text = "MAX COMBO  " + data.MaxCombo;
         if (newBestLabel != null) newBestLabel.gameObject.SetActive(data.IsNewBest);
 
-        // スコア＆ランクはカウントアップ演出で更新
+        // Score and rank are updated via count-up animation
         if (resultAnimator != null && rankTable != null)
         {
             resultAnimator.Animate(
@@ -53,7 +53,7 @@ public class ResultScreenUI : MonoBehaviour
         }
         else
         {
-            // 演出なしのフォールバック
+            // Fallback without animation
             if (scoreText != null) scoreText.text = "SCORE      " + data.Score;
             RankEntry rank = RankCalculator.GetRank(rankTable, data.Score);
             if (rank != null) rankDisplay?.SetRank(rank);
@@ -67,7 +67,7 @@ public class ResultScreenUI : MonoBehaviour
         cardLotteryUI?.Hide();
         if (panel != null) panel.SetActive(false);
 
-        // テキストを初期化しておく（次回Show()前に古い値が一瞬見えないよう）
+        // Clear text to prevent old values flashing before the next Show()
         if (scoreText    != null) scoreText.text    = "";
         if (bestText     != null) bestText.text     = "";
         if (perfectText  != null) perfectText.text  = "";

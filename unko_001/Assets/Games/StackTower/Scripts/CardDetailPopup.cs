@@ -3,25 +3,25 @@ using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// カード拡大表示ポップアップ。
-/// 未所持カードはシルエット＋"???"で表示する。
+/// Full-screen card detail popup.
+/// Unowned cards are shown as silhouette with "???".
 /// </summary>
 public class CardDetailPopup : MonoBehaviour
 {
-    [Header("パネル")]
+    [Header("Panel")]
     public GameObject panel;
-    public GameObject backdrop;   // 半透明の背景。タップで閉じる用
+    public GameObject backdrop;   // Semi-transparent background. Tap to close.
 
-    [Header("カード表示")]
+    [Header("Card Display")]
     public Image           artwork;
     public TextMeshProUGUI cardNameText;
     public TextMeshProUGUI rarityText;
-    public TextMeshProUGUI unownedMessage;  // "まだ手に入れていないカードですわ" など
+    public TextMeshProUGUI unownedMessage;  // Shown when the card has not been obtained yet
 
-    [Header("未所持時のカラー")]
+    [Header("Unowned Color")]
     public Color unownedColor = new(0.15f, 0.15f, 0.15f, 1f);
 
-    [Header("レアリティ別カラー")]
+    [Header("Rarity Colors")]
     public Color colorCommon    = Color.white;
     public Color colorRare      = new(0.3f, 0.7f, 1f);
     public Color colorEpic      = new(0.8f, 0.3f, 1f);
@@ -58,7 +58,7 @@ public class CardDetailPopup : MonoBehaviour
         if (panel != null) panel.SetActive(false);
     }
 
-    // backdrop や閉じるボタンの OnClick にアサインする
+    // Assign this to the backdrop or close button OnClick
     public void OnCloseButton() => Hide();
 
     Color RarityColor(CardRarity rarity) => rarity switch

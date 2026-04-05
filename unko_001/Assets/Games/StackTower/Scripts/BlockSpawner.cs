@@ -2,28 +2,28 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// ブロックの生成・移動・入力受付を管理する。
-/// TowerGameManager から StartSpawning() を呼んでゲームを開始する。
+/// Manages block spawning, movement, and input handling.
+/// Call StartSpawning() from TowerGameManager to start the game.
 /// </summary>
 public class BlockSpawner : MonoBehaviour
 {
-    [Header("ブロック設定")]
+    [Header("Block Settings")]
     public float blockWidth  = 3f;
     public float blockHeight = 0.4f;
     public float blockDepth  = 3f;
-    public float moveRange   = 3f;  // X 軸の往復範囲（±）
+    public float moveRange   = 3f;  // X-axis sweep range (±)
 
-    [Header("難易度")]
+    [Header("Difficulty")]
     public float baseSpeed      = 2.5f;
-    public float speedIncrement = 0.1f;  // スコアごとの加速量
+    public float speedIncrement = 0.1f;  // Speed increase per score point
 
-    [Header("土台モデル（設定するとCubeの代わりに使用）")]
+    [Header("Foundation Model (uses Cube if not set)")]
     public GameObject bbqTablePrefab;
 
-    [Header("肉モデル（設定するとCubeの代わりに使用）")]
+    [Header("Block Model (uses Cube if not set)")]
     public GameObject meatPrefab;
 
-    [Header("カラーパレット（Inspector で設定）")]
+    [Header("Color Palette (set in Inspector)")]
     public Color[] blockColors = new Color[]
     {
         new Color(0.95f, 0.35f, 0.35f),
@@ -33,7 +33,7 @@ public class BlockSpawner : MonoBehaviour
         new Color(0.85f, 0.45f, 0.95f),
     };
 
-    // カメラが追従するための「現在のブロック上面」Transform
+    // Transform of the current block's top face, used by CameraFollow
     [HideInInspector] public Transform topBlockTransform;
 
     private TowerBlock currentBlock;
@@ -44,10 +44,10 @@ public class BlockSpawner : MonoBehaviour
 
     private readonly List<GameObject> _spawnedObjects = new List<GameObject>();
 
-    // 各ブロックの Y 座標（土台は 0）
+    // Y position for the next block (foundation is at 0)
     private float nextBlockY = 0f;
 
-    // 次に生成するブロックの移動軸（X→Z→X→... と交互）
+    // Movement axis for the next block (alternates X → Z → X → ...)
     private MoveAxis _nextAxis = MoveAxis.X;
 
     public void StartSpawning()
@@ -59,7 +59,7 @@ public class BlockSpawner : MonoBehaviour
         currentBlock = null;
         _nextAxis = MoveAxis.X;
 
-        // 土台ブロックを生成（動かない）
+        // Spawn the foundation block (stationary)
         SpawnFoundation();
     }
 
@@ -71,7 +71,7 @@ public class BlockSpawner : MonoBehaviour
     }
 
     /// <summary>
-    /// コンティニュー時に呼ぶ。現在の塔の高さからブロックを初期サイズで再開する。
+    /// Call on continue. Resumes spawning from the current tower height with the initial block size.
     /// </summary>
     public void ContinueSpawning()
     {
@@ -94,7 +94,7 @@ public class BlockSpawner : MonoBehaviour
         {
             if (go != null)
             {
-                go.SetActive(false);   // 即座に非表示にしてから破棄
+                go.SetActive(false);   // Hide immediately before destroying
                 Object.Destroy(go);
             }
         }
@@ -113,10 +113,10 @@ public class BlockSpawner : MonoBehaviour
         if (!isSpawning) return;
         if (currentBlock == null || currentBlock.isDropped) return;
 
-        // 広告表示中は入力を無視
+        // Block input while an ad is showing
         if (AdsManager.Instance != null && AdsManager.Instance.IsAdShowing) return;
 
-        // Space キー or 画面タップで Drop
+        // Drop on Space, screen tap, or mouse click
         bool dropped = false;
         if (Input.GetKeyDown(KeyCode.Space)) dropped = true;
         if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) dropped = true;
@@ -138,10 +138,10 @@ public class BlockSpawner : MonoBehaviour
             go = Object.Instantiate(bbqTablePrefab);
             go.name = "Block_Foundation";
             go.transform.position = new Vector3(0f, nextBlockY - 2f, 0f);
-            // x/z を blockWidth/blockDepth に合わせることで、次ブロックが正しいサイズを引き継ぐ
+            // Match x/z to blockWidth/blockDepth so the next block inherits the correct size
             go.transform.localScale = new Vector3(blockWidth, 1f, blockDepth);
 
-            // BBQTable の実際の上端から次ブロックのY座標を決める
+            // Determine nextBlockY from the actual top of the BBQTable bounds
             Renderer[] renderers = go.GetComponentsInChildren<Renderer>();
             if (renderers.Length > 0)
             {
@@ -196,7 +196,7 @@ public class BlockSpawner : MonoBehaviour
         MoveAxis axis = _nextAxis;
         _nextAxis = axis == MoveAxis.X ? MoveAxis.Z : MoveAxis.X;
 
-        // 前ブロックの幅・奥行を引き継ぐ（コンティニュー時は初期サイズに戻す）
+        // Inherit width/depth from the previous block (reset to initial size on continue)
         float w, d;
         if (_useInitialSizeOnce)
         {
@@ -210,11 +210,11 @@ public class BlockSpawner : MonoBehaviour
             d = lastPlacedBlock != null ? lastPlacedBlock.transform.localScale.z : blockDepth;
         }
 
-        // 前ブロックの中心位置（固定軸は前ブロックに揃える）
+        // Fixed axis aligns to the previous block's center
         float prevX = lastPlacedBlock != null ? lastPlacedBlock.transform.position.x : 0f;
         float prevZ = lastPlacedBlock != null ? lastPlacedBlock.transform.position.z : 0f;
 
-        // スタート位置：移動軸は +moveRange、固定軸は前ブロックの中心
+        // Start position: moving axis starts at +moveRange, fixed axis aligns to previous block
         Vector3 spawnPos = axis == MoveAxis.X
             ? new Vector3(moveRange, nextBlockY, prevZ)
             : new Vector3(prevX, nextBlockY, moveRange);
@@ -257,7 +257,7 @@ public class BlockSpawner : MonoBehaviour
     }
 
     /// <summary>
-    /// TowerBlock.Slice() 完了後に呼ばれる。
+    /// Called after TowerBlock.Slice() completes.
     /// </summary>
     public void OnBlockPlaced(TowerBlock block, PlacementQuality quality = PlacementQuality.Good)
     {

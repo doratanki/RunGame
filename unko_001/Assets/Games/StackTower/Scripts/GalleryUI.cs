@@ -3,38 +3,38 @@ using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// ギャラリー画面。カードタブとランクタブを切り替えて表示する。
-/// ScrollView の Content に GalleryCardCell / GalleryRankCell を動的生成する。
+/// Gallery screen. Switches between a card tab and a rank tab.
+/// Dynamically generates GalleryCardCell / GalleryRankCell in the ScrollView Content.
 /// </summary>
 public class GalleryUI : MonoBehaviour
 {
-    [Header("パネル")]
+    [Header("Panel")]
     public GameObject panel;
 
-    [Header("タブボタン")]
+    [Header("Tab Buttons")]
     public Button cardTabButton;
     public Button rankTabButton;
 
-    [Header("タブ内容")]
+    [Header("Tab Content")]
     public GameObject cardTabContent;
     public GameObject rankTabContent;
 
-    [Header("スクロール")]
+    [Header("Scroll")]
     public Transform cardGrid;   // ScrollView > Viewport > Content
     public Transform rankGrid;   // ScrollView > Viewport > Content
 
-    [Header("プレハブ")]
+    [Header("Prefabs")]
     public GalleryCardCell cardCellPrefab;
     public GalleryRankCell rankCellPrefab;
 
-    [Header("データ")]
+    [Header("Data")]
     public CardPool  cardPool;
     public RankTable rankTable;
 
-    [Header("所持数テキスト（省略可）")]
+    [Header("Owned Count Text (optional)")]
     public TextMeshProUGUI ownedCountText;
 
-    [Header("カード詳細ポップアップ")]
+    [Header("Card Detail Popup")]
     public CardDetailPopup cardDetailPopup;
 
     bool _built;
@@ -51,7 +51,7 @@ public class GalleryUI : MonoBehaviour
         }
         else
         {
-            // 所持状況が変わっている可能性があるので再描画
+            // Ownership may have changed, so refresh
             RebuildCardGrid();
         }
 
@@ -64,7 +64,7 @@ public class GalleryUI : MonoBehaviour
         if (panel != null) panel.SetActive(false);
     }
 
-    // ---- タブ切り替え ----
+    // ---- Tab switching ----
 
     public void ShowCardTab()
     {
@@ -78,7 +78,7 @@ public class GalleryUI : MonoBehaviour
         if (rankTabContent != null) rankTabContent.SetActive(true);
     }
 
-    // ---- グリッド構築 ----
+    // ---- Grid building ----
 
     void BuildCardGrid()
     {
@@ -96,7 +96,7 @@ public class GalleryUI : MonoBehaviour
     {
         if (cardGrid == null) return;
 
-        // 既存セルに再適用（再生成せず状態だけ更新）
+        // Update existing cells without recreating them
         int i = 0;
         foreach (Transform child in cardGrid)
         {

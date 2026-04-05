@@ -3,20 +3,20 @@ using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// カード抽選結果を表示するパネル。
+/// Panel that displays the card lottery result.
 /// </summary>
 public class CardLotteryUI : MonoBehaviour
 {
-    [Header("パネル")]
+    [Header("Panel")]
     public GameObject panel;
 
-    [Header("カード表示")]
+    [Header("Card Display")]
     public Image             cardArtwork;
     public TextMeshProUGUI   cardNameText;
     public TextMeshProUGUI   rarityText;
-    public TextMeshProUGUI   newLabel;       // "NEW!" 表示。重複時は非表示
+    public TextMeshProUGUI   newLabel;       // "NEW!" label — hidden on duplicates
 
-    [Header("レアリティ別カラー")]
+    [Header("Rarity Colors")]
     public Color colorCommon    = Color.white;
     public Color colorRare      = new(0.3f, 0.7f, 1f);
     public Color colorEpic      = new(0.8f, 0.3f, 1f);

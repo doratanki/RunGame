@@ -3,21 +3,20 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// スコアのカウントアップとランク遷移演出を駆動するコルーチン管理クラス。
+/// Coroutine manager that drives the score count-up and rank transition animation.
 /// </summary>
 public class ResultAnimator : MonoBehaviour
 {
-    [Tooltip("カウントアップにかける秒数")]
+    [Tooltip("Duration of the count-up animation in seconds")]
     public float countDuration = 2.0f;
 
-    [Tooltip("ランクアップ時に挿入するポーズ秒数")]
+    [Tooltip("Pause duration inserted on rank-up to make the effect visible")]
     public float rankUpPauseDuration = 0.3f;
 
     private Coroutine _running;
 
     /// <summary>
-    /// スコアを 0 から finalScore までカウントアップしながら、
-    /// ランク閾値を超えるたびに onRankChanged を呼ぶ。
+    /// Counts up from 0 to finalScore, calling onRankChanged each time a rank threshold is crossed.
     /// </summary>
     public void Animate(
         int finalScore,
@@ -58,28 +57,28 @@ public class ResultAnimator : MonoBehaviour
             elapsed += Time.deltaTime;
             float t = elapsed / countDuration;
 
-            // イーズアウト（終盤ゆっくり）
+            // Ease-out (slows down near the end)
             float eased = 1f - Mathf.Pow(1f - Mathf.Clamp01(t), 3f);
             int displayScore = Mathf.RoundToInt(eased * finalScore);
 
             onScoreUpdated?.Invoke(displayScore);
 
-            // ランク閾値を越えたか確認
+            // Check if a rank threshold was crossed
             RankEntry newRank = RankCalculator.GetRank(rankTable, displayScore);
             if (newRank != null && newRank.label != currentRank?.label)
             {
                 currentRank = newRank;
                 onRankChanged?.Invoke(currentRank);
 
-                // ランクアップ時は一瞬ポーズして演出を目立たせる
+                // Brief pause on rank-up to highlight the effect
                 yield return new WaitForSeconds(rankUpPauseDuration);
-                elapsed += rankUpPauseDuration; // ポーズ分を経過時間に加算
+                elapsed += rankUpPauseDuration; // Add pause time to elapsed so duration stays accurate
             }
 
             yield return null;
         }
 
-        // 最終値を確定
+        // Finalize
         onScoreUpdated?.Invoke(finalScore);
         RankEntry finalRank = RankCalculator.GetRank(rankTable, finalScore);
         if (finalRank != null && finalRank.label != currentRank?.label)

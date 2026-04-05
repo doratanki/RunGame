@@ -1,25 +1,25 @@
 using UnityEngine;
 
 /// <summary>
-/// 積み上げ中の1ブロックを管理する。
-/// Drop() を呼ぶと移動を止め、前のブロックと重なりを計算して Slice する。
-/// X軸・Z軸どちらの移動にも対応。
+/// Manages a single block being stacked.
+/// Calling Drop() stops movement and calculates the overlap with the previous block to Slice.
+/// Supports both X-axis and Z-axis movement.
 /// </summary>
 public class TowerBlock : MonoBehaviour
 {
-    // BlockSpawner から初期化される
+    // Initialized by BlockSpawner
     [HideInInspector] public BlockSpawner spawner;
-    [HideInInspector] public TowerBlock previousBlock; // 1つ前のブロック（null = 最初の土台）
+    [HideInInspector] public TowerBlock previousBlock; // Previous block (null = foundation)
 
     [HideInInspector] public bool isDropped = false;
 
-    // 移動パラメータ（BlockSpawner が設定）
+    // Movement parameters (set by BlockSpawner)
     public float moveSpeed = 3f;
     private int moveDirection = -1;
     private float moveRange = 3f;
     [HideInInspector] public MoveAxis moveAxis = MoveAxis.X;
 
-    // ブロックカラー（BlockSpawner が設定）
+    // Block color (set by BlockSpawner)
     public Color blockColor = Color.white;
     private bool _colorInitialized = false;
 
@@ -78,7 +78,7 @@ public class TowerBlock : MonoBehaviour
     }
 
     /// <summary>
-    /// タップ/入力時に呼ばれる。ブロックを停止しスライスを実行する。
+    /// Called on tap/input. Stops the block and executes the slice.
     /// </summary>
     public void Drop()
     {
@@ -104,7 +104,7 @@ public class TowerBlock : MonoBehaviour
         float prevCenter = isX ? previousBlock.transform.position.x : previousBlock.transform.position.z;
         float prevSize   = isX ? previousBlock.transform.localScale.x : previousBlock.transform.localScale.z;
 
-        // 1ブロック目（土台の上）だけあたり判定を1.3倍に
+        // Only for the first block above the foundation, widen the hit area by 1.7x
         if (previousBlock.previousBlock == null)
             prevSize *= 1.7f;
         float currCenter = isX ? transform.position.x : transform.position.z;
@@ -142,7 +142,7 @@ public class TowerBlock : MonoBehaviour
         {
             HapticManager.TriggerLight();
             PerfectEffectManager.Instance?.PlayPerfect(transform.position);
-            // 前ブロック中心にスナップ
+            // Snap to the previous block's center
             if (isX)
                 transform.position = new Vector3(prevCenter, transform.position.y, transform.position.z);
             else
@@ -208,7 +208,7 @@ public class TowerBlock : MonoBehaviour
             debris.transform.localScale = new Vector3(transform.localScale.x, transform.localScale.y, size);
         }
 
-        // meatPrefab は Collider を持つ想定、CreatePrimitive は自動生成されるのでチェック不要
+        // meatPrefab is expected to have a Collider; CreatePrimitive generates one automatically
         if (spawner != null && spawner.meatPrefab != null && debris.GetComponent<Collider>() == null)
             debris.AddComponent<BoxCollider>();
         Rigidbody rb = debris.AddComponent<Rigidbody>();

@@ -1,8 +1,9 @@
 using UnityEngine;
 
 /// <summary>
-/// アタッチした RectTransform をデバイスのセーフエリアに合わせて調整する。
-/// Canvas 直下に空の GameObject を作り、全 UI をその子にしてこのスクリプトをアタッチする。
+/// Adjusts the attached RectTransform to match the device's safe area.
+/// Create an empty GameObject directly under the Canvas, place all UI as its children,
+/// and attach this script to it.
 /// </summary>
 [RequireComponent(typeof(RectTransform))]
 public class SafeAreaPanel : MonoBehaviour

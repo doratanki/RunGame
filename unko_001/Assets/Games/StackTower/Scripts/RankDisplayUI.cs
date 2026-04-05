@@ -3,24 +3,24 @@ using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// ランクのビジュアル表示・アニメーションを担当する。
-/// Animator は省略可能。アサインすれば animTrigger で演出が走る。
+/// Handles the visual display and animation of the rank.
+/// Animator is optional; if assigned, animTrigger fires the rank-up effect.
 /// </summary>
 public class RankDisplayUI : MonoBehaviour
 {
-    [Header("テキスト")]
+    [Header("Text")]
     public TextMeshProUGUI rankLabel;
 
-    [Header("画像")]
+    [Header("Image")]
     public Image rankImage;
 
-    [Header("アニメーション（省略可）")]
+    [Header("Animation (optional)")]
     public Animator animator;
 
     private RankEntry _current;
 
     /// <summary>
-    /// 即時反映（演出なし）。初期表示などに使う。
+    /// Immediate update without animation. Use for initial display.
     /// </summary>
     public void SetRank(RankEntry rank)
     {
@@ -29,7 +29,7 @@ public class RankDisplayUI : MonoBehaviour
     }
 
     /// <summary>
-    /// ランクアップ演出付きで更新する。
+    /// Updates with rank-up animation.
     /// </summary>
     public void PlayRankUp(RankEntry rank)
     {

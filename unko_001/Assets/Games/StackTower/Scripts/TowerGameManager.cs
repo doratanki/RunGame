@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// Stack Tower のゲーム状態・スコアを管理するシングルトン。
+/// Singleton that manages game state and score for Stack Tower.
 /// </summary>
 public class TowerGameManager : MonoBehaviour
 {
@@ -51,7 +51,7 @@ public class TowerGameManager : MonoBehaviour
         towerUI?.ShowGame(Score);
         blockSpawner?.StartSpawning();
 
-        // カメラターゲットを BlockSpawner の topBlockTransform にセット
+        // Set camera target to BlockSpawner's topBlockTransform
         if (cameraFollow != null && blockSpawner != null)
             cameraFollow.target = blockSpawner.topBlockTransform;
     }
@@ -80,7 +80,7 @@ public class TowerGameManager : MonoBehaviour
         towerUI?.UpdateScore(Score);
         towerUI?.UpdatePlacement(quality, ComboCount);
 
-        // カメラターゲットを最新ブロックに更新
+        // Update camera target to the latest block
         if (cameraFollow != null && blockSpawner != null)
             cameraFollow.target = blockSpawner.topBlockTransform;
     }
@@ -94,7 +94,7 @@ public class TowerGameManager : MonoBehaviour
         TowerAudioManager.Instance?.PlayGameOver();
         blockSpawner?.StopSpawning();
 
-        // コンティニューがまだ使われていなければ 30% の確率でダイアログを出す
+        // Show continue dialog with 30% chance if not already used
         if (!HasContinued && Random.value < 0.3f)
         {
             towerUI?.ShowContinueDialog();
@@ -104,7 +104,7 @@ public class TowerGameManager : MonoBehaviour
         ShowResult();
     }
 
-    /// <summary>コンティニューダイアログで「続ける」を選んだ時に呼ぶ。</summary>
+    /// <summary>Call when the player chooses to continue from the continue dialog.</summary>
     public void ContinueGame()
     {
         if (HasContinued) return;
@@ -118,10 +118,10 @@ public class TowerGameManager : MonoBehaviour
             cameraFollow.target = blockSpawner.topBlockTransform;
     }
 
-    /// <summary>コンティニューダイアログで「あきらめる」を選んだ時に呼ぶ。</summary>
+    /// <summary>Call when the player chooses to give up from the continue dialog.</summary>
     public void GiveUp()
     {
-        HasContinued = true; // 使用済みにして直接リザルトへ
+        HasContinued = true; // Mark as used and go directly to result
         ShowResult();
     }
 
@@ -142,7 +142,7 @@ public class TowerGameManager : MonoBehaviour
     {
         blockSpawner?.ClearBlocks();
         StartGame();
-        // カメラを即座に初期位置へスナップ（前のゲームの高さに残らないよう）
+        // Snap camera to initial position immediately so it doesn't stay at the previous game's height
         cameraFollow?.SnapToTarget();
     }
 

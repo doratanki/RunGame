@@ -3,29 +3,29 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// パーフェクト時のエフェクトをまとめて管理する。
-/// TowerGameManager と同じ GameObject にアタッチし、PlayPerfect() を呼ぶ。
+/// Manages all effects triggered on a Perfect placement.
+/// Attach to the same GameObject as TowerGameManager and call PlayPerfect().
 /// </summary>
 public class PerfectEffectManager : MonoBehaviour
 {
     public static PerfectEffectManager Instance { get; private set; }
 
-    [Header("1. 画面フラッシュ")]
+    [Header("1. Screen Flash")]
     public Image flashImage;
     public Color flashColor = new Color(1f, 1f, 0.6f, 0.6f);
     public float flashDuration = 0.25f;
 
-    [Header("2. カメラシェイク")]
+    [Header("2. Camera Shake")]
     public CameraFollow cameraFollow;
     public float shakeDuration  = 0.3f;
     public float shakeMagnitude = 0.15f;
 
-    [Header("3. ビネット")]
+    [Header("3. Vignette")]
     public Image vignetteImage;
     public Color vignetteColor = new Color(1f, 0.85f, 0f, 0.5f);
     public float vignetteDuration = 0.4f;
 
-    [Header("4. パーティクル")]
+    [Header("4. Particle")]
     public ParticleSystem perfectParticle;
 
     void Awake()
@@ -54,7 +54,7 @@ public class PerfectEffectManager : MonoBehaviour
         }
     }
 
-    // ---- 1. フラッシュ ----
+    // ---- 1. Flash ----
     IEnumerator FlashRoutine()
     {
         flashImage.color = flashColor;
@@ -73,7 +73,7 @@ public class PerfectEffectManager : MonoBehaviour
         flashImage.gameObject.SetActive(false);
     }
 
-    // ---- 2. カメラシェイク ----
+    // ---- 2. Camera Shake ----
     IEnumerator ShakeRoutine()
     {
         float elapsed = 0f;
@@ -87,7 +87,7 @@ public class PerfectEffectManager : MonoBehaviour
         cameraFollow.shakeOffset = Vector3.zero;
     }
 
-    // ---- 3. ビネット ----
+    // ---- 3. Vignette ----
     IEnumerator VignetteRoutine()
     {
         vignetteImage.color = vignetteColor;

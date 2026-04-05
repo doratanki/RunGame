@@ -4,9 +4,9 @@ using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// カードギャラリーの1セル。
-/// 未所持は暗転・名前を "???" で隠す。
-/// タップ時に onTapped(CardData) を呼ぶ。
+/// One cell in the card gallery.
+/// Unowned cards are darkened and their name is hidden as "???".
+/// Calls onTapped(CardData) when tapped.
 /// </summary>
 public class GalleryCardCell : MonoBehaviour
 {
@@ -14,13 +14,13 @@ public class GalleryCardCell : MonoBehaviour
     public Image           artwork;
     public TextMeshProUGUI cardNameText;
     public TextMeshProUGUI rarityText;
-    public GameObject      newBadge;     // 最近取得したカードにバッジ表示（省略可）
-    public Button          button;       // セル全体に被せる Button
+    public GameObject      newBadge;     // New card badge (optional, reserved for future use)
+    public Button          button;       // Button covering the entire cell
 
-    [Header("未所持時のカラー")]
+    [Header("Unowned Color")]
     public Color unownedColor = new(0.2f, 0.2f, 0.2f, 1f);
 
-    [Header("レアリティ別カラー")]
+    [Header("Rarity Colors")]
     public Color colorCommon    = Color.white;
     public Color colorRare      = new(0.3f, 0.7f, 1f);
     public Color colorEpic      = new(0.8f, 0.3f, 1f);
@@ -56,7 +56,7 @@ public class GalleryCardCell : MonoBehaviour
         }
 
         if (newBadge != null)
-            newBadge.SetActive(false); // 将来的に「新着」マーク拡張用
+            newBadge.SetActive(false); // Reserved for future "new arrival" badge
     }
 
     Color RarityColor(CardRarity rarity) => rarity switch

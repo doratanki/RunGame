@@ -1,8 +1,8 @@
 using UnityEngine;
 
 /// <summary>
-/// URP / Standard シェーダーをキャッシュして返す共通ユーティリティ。
-/// ゲームをまたいで利用する。
+/// Common utility that caches and returns the URP / Standard shader.
+/// Shared across games.
 /// </summary>
 public static class ShaderUtil
 {

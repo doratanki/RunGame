@@ -1,23 +1,23 @@
 using UnityEngine;
 
 /// <summary>
-/// ターゲットの Y 座標にのみ追従するカメラ制御。
-/// Stack Tower のように縦に積み上げるゲームで使用する。
-/// X / Z はオフセットのみ固定。
+/// Camera controller that follows only the target's Y position.
+/// Used for vertically stacking games like Stack Tower.
+/// X / Z are fixed by offset only.
 /// </summary>
 public class CameraFollow : MonoBehaviour
 {
     public Transform target;
 
-    [Header("オフセット（カメラ位置の相対値）")]
+    [Header("Offset (relative camera position)")]
     public Vector3 offset = new Vector3(7f, 7f, -20f);
 
-    [Header("スムーズ速度")]
+    [Header("Smooth Speed")]
     public float smoothSpeed = 4f;
 
     [HideInInspector] public Vector3 shakeOffset;
 
-    /// <summary>ゲームリセット時にカメラ位置を即スナップする。</summary>
+    /// <summary>Snaps the camera to the target immediately on game reset.</summary>
     public void SnapToTarget()
     {
         if (target == null) return;
@@ -30,7 +30,7 @@ public class CameraFollow : MonoBehaviour
     {
         if (target == null) return;
 
-        // X / Z はオフセット固定、Y のみターゲットに追従
+        // X / Z are fixed by offset, only Y follows the target
         float targetY = target.position.y + offset.y;
         Vector3 desiredPos = new Vector3(offset.x, targetY, offset.z) + shakeOffset;
 

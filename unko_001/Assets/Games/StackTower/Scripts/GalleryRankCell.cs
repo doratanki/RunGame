@@ -3,8 +3,8 @@ using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// ランクギャラリーの1セル。
-/// ランク画像・ラベル・スコア条件を表示する。
+/// One cell in the rank gallery.
+/// Displays the rank image, label, and score requirement.
 /// </summary>
 public class GalleryRankCell : MonoBehaviour
 {
@@ -29,19 +29,17 @@ public class GalleryRankCell : MonoBehaviour
 
         if (minScoreText != null)
             minScoreText.text = entry.minScore == 0
-                ? "〜 " + NextMinScore(entry) + " 未満"
-                : entry.minScore + " 〜";
+                ? "0 ~ " + NextMinScore(entry)
+                : entry.minScore + " ~";
     }
 
-    // minScoreText の上限表示用。GalleryUI 側から注入する方式にしても良い。
-    // ここでは Setup 後に呼ぶ別メソッドで対応。
     public void SetScoreRange(int min, int? max)
     {
         if (minScoreText == null) return;
         minScoreText.text = max.HasValue
-            ? $"{min} 〜 {max - 1}"
-            : $"{min} 〜";
+            ? $"{min} ~ {max - 1}"
+            : $"{min} ~";
     }
 
-    static int NextMinScore(RankEntry _) => 0; // ダミー。GalleryUI 側で SetScoreRange を使う
+    static int NextMinScore(RankEntry _) => 0; // Dummy. GalleryUI uses SetScoreRange instead.
 }
