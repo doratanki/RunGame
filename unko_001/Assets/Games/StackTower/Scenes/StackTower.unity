@@ -335,7 +335,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -1049,7 +1049,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4294967040
   m_fontColor: {r: 0, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -1062,7 +1062,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -2102,7 +2102,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -3617,7 +3617,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -3910,7 +3910,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -4527,6 +4527,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a5a121919696445da2e474b227ac9a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TowerGameManager
+  gameConfig: {fileID: 11400000, guid: d0585776562ad445d8ae73ed6929f069, type: 2}
   blockSpawner: {fileID: 1586785630}
   towerUI: {fileID: 803928769}
   cameraFollow: {fileID: 1647902313}
@@ -4598,6 +4599,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 645ffbd47598e428da9708d358093340, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AdsManager
+  gameIdIos: YOUR_IOS_GAME_ID
+  gameIdAndroid: YOUR_ANDROID_GAME_ID
+  interstitialAdUnitIdIos: Interstitial_iOS
+  interstitialAdUnitIdAndroid: Interstitial_Android
+  rewardedAdUnitIdIos: Rewarded_iOS
+  rewardedAdUnitIdAndroid: Rewarded_Android
+  testMode: 1
+  adShowTimeout: 10
 --- !u!114 &871038063
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6698,7 +6707,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -6800,6 +6809,7 @@ MonoBehaviour:
   - {r: 0.95, g: 0.85, b: 0.25, a: 1}
   - {r: 0.85, g: 0.45, b: 0.95, a: 1}
   topBlockTransform: {fileID: 0}
+  debrisPool: {fileID: 0}
 --- !u!4 &1586785631
 Transform:
   m_ObjectHideFlags: 0
@@ -7843,6 +7853,9 @@ MonoBehaviour:
   perfectText: {fileID: 1291676813}
   displayDuration: 0.6
   fadeDuration: 0.4
+  perfectColor: {r: 1, g: 1, b: 1, a: 1}
+  goodColor: {r: 0.4, g: 0.9, b: 0.4, a: 1}
+  badColor: {r: 0.9, g: 0.4, b: 0.4, a: 1}
 --- !u!1 &1859760573
 GameObject:
   m_ObjectHideFlags: 0
@@ -8300,7 +8313,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -8437,7 +8450,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
