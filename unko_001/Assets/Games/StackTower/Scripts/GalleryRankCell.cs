@@ -28,9 +28,7 @@ public class GalleryRankCell : MonoBehaviour
         }
 
         if (minScoreText != null)
-            minScoreText.text = entry.minScore == 0
-                ? "0 ~ " + NextMinScore(entry)
-                : entry.minScore + " ~";
+            minScoreText.text = entry.minScore + " ~";
     }
 
     public void SetScoreRange(int min, int? max)
@@ -40,6 +38,4 @@ public class GalleryRankCell : MonoBehaviour
             ? $"{min} ~ {max - 1}"
             : $"{min} ~";
     }
-
-    static int NextMinScore(RankEntry _) => 0; // Dummy. GalleryUI uses SetScoreRange instead.
 }

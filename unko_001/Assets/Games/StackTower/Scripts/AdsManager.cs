@@ -4,7 +4,6 @@ using Unity.Services.Core;
 using UnityEngine;
 using UnityEngine.Advertisements;
 
-
 /// <summary>
 /// Manages Unity Ads (UGS) as a singleton.
 /// Attach to the same GameObject as TowerGameManager.
@@ -17,20 +16,25 @@ using UnityEngine.Advertisements;
 ///   - com.unity.services.core
 ///   - com.unity.ads (4.x)
 /// </summary>
-public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnityAdsLoadListener, IUnityAdsShowListener
+public class AdsManager : Singleton<AdsManager>, IUnityAdsInitializationListener, IUnityAdsLoadListener, IUnityAdsShowListener
 {
-    public static AdsManager Instance { get; private set; }
+    [Header("Game IDs (set per platform in Inspector)")]
+    [SerializeField] private string gameIdIos     = "YOUR_IOS_GAME_ID";
+    [SerializeField] private string gameIdAndroid = "YOUR_ANDROID_GAME_ID";
 
-    private const string GameIdIos     = "6082458";
-    private const string GameIdAndroid = "6082459";
-    private const string InterstitialAdUnitIdIos     = "Interstitial_iOS";
-    private const string InterstitialAdUnitIdAndroid = "Interstitial_Android";
-    private const string RewardedAdUnitIdIos         = "Rewarded_iOS";
-    private const string RewardedAdUnitIdAndroid     = "Rewarded_Android";
-    private const bool   TestMode = true;
+    [Header("Ad Unit IDs")]
+    [SerializeField] private string interstitialAdUnitIdIos     = "Interstitial_iOS";
+    [SerializeField] private string interstitialAdUnitIdAndroid = "Interstitial_Android";
+    [SerializeField] private string rewardedAdUnitIdIos         = "Rewarded_iOS";
+    [SerializeField] private string rewardedAdUnitIdAndroid     = "Rewarded_Android";
 
-    private string interstitialAdUnitId;
-    private string rewardedAdUnitId;
+    [Header("Settings")]
+    [SerializeField] private bool testMode = true;
+    [Tooltip("Seconds before IsAdShowing is force-reset if no callback arrives.")]
+    [SerializeField] private float adShowTimeout = 10f;
+
+    private string _interstitialAdUnitId;
+    private string _rewardedAdUnitId;
 
     private bool _isInitialized    = false;
     private bool _isAdLoaded       = false;
@@ -39,23 +43,35 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
     /// <summary>True while an ad is showing. Use this to block game input.</summary>
     public bool IsAdShowing { get; private set; } = false;
 
+    private float _adShowTimeoutRemaining = -1f;
+
     // Rewarded ad completion callbacks
     private Action _onRewardedComplete;
     private Action _onRewardedFailed;
 
     // ---- Lifecycle ----
 
-    void Awake()
+    protected override void Awake()
     {
-        if (Instance == null)
-            Instance = this;
-        else
-        {
-            Destroy(gameObject);
-            return;
-        }
+        base.Awake();
+        if (Instance != this) return;
 
         StartCoroutine(InitializeUGSCoroutine());
+    }
+
+    void Update()
+    {
+        // Safety timeout: if IsAdShowing gets stuck, reset it after adShowTimeout seconds
+        if (_adShowTimeoutRemaining > 0f)
+        {
+            _adShowTimeoutRemaining -= Time.deltaTime;
+            if (_adShowTimeoutRemaining <= 0f)
+            {
+                Debug.LogWarning("[AdsManager] Ad show timeout — resetting IsAdShowing flag.");
+                IsAdShowing = false;
+                _adShowTimeoutRemaining = -1f;
+            }
+        }
     }
 
     IEnumerator InitializeUGSCoroutine()
@@ -74,21 +90,21 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
 
     void InitializeAds()
     {
-        string gameId = Application.platform == RuntimePlatform.IPhonePlayer
-            ? GameIdIos
-            : GameIdAndroid;
+        bool isIos = Application.platform == RuntimePlatform.IPhonePlayer;
+        string gameId = isIos ? gameIdIos : gameIdAndroid;
 
-        interstitialAdUnitId = Application.platform == RuntimePlatform.IPhonePlayer
-            ? InterstitialAdUnitIdIos
-            : InterstitialAdUnitIdAndroid;
+        _interstitialAdUnitId = isIos ? interstitialAdUnitIdIos : interstitialAdUnitIdAndroid;
+        _rewardedAdUnitId     = isIos ? rewardedAdUnitIdIos     : rewardedAdUnitIdAndroid;
 
-        rewardedAdUnitId = Application.platform == RuntimePlatform.IPhonePlayer
-            ? RewardedAdUnitIdIos
-            : RewardedAdUnitIdAndroid;
+        if (Advertisement.isInitialized)
+        {
+            _isInitialized = true;
+            LoadInterstitial();
+            LoadRewarded();
+            return;
+        }
 
-        if (Advertisement.isInitialized) { _isInitialized = true; LoadInterstitial(); LoadRewarded(); return; }
-
-        Advertisement.Initialize(gameId, TestMode, this);
+        Advertisement.Initialize(gameId, testMode, this);
     }
 
     // ---- Public API ----
@@ -98,7 +114,6 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
     /// </summary>
     public void ShowInterstitial()
     {
-        // Skip if ads have been removed by purchase
         if (IAPManager.Instance != null && IAPManager.Instance.IsRemoveAdsPurchased)
         {
             Debug.Log("[AdsManager] Ads removed by purchase. Skipping.");
@@ -111,10 +126,8 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
             return;
         }
 
-        Advertisement.Show(interstitialAdUnitId, this);
+        Advertisement.Show(_interstitialAdUnitId, this);
     }
-
-    // ---- IUnityAdsInitializationListener ----
 
     /// <summary>
     /// Show a rewarded ad.
@@ -130,10 +143,12 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
         }
         _onRewardedComplete = onComplete;
         _onRewardedFailed   = onFailed;
-        Advertisement.Show(rewardedAdUnitId, this);
+        Advertisement.Show(_rewardedAdUnitId, this);
     }
 
     public bool IsRewardedReady => _isInitialized && _isRewardedLoaded;
+
+    // ---- IUnityAdsInitializationListener ----
 
     public void OnInitializationComplete()
     {
@@ -153,19 +168,19 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
     void LoadInterstitial()
     {
         _isAdLoaded = false;
-        Advertisement.Load(interstitialAdUnitId, this);
+        Advertisement.Load(_interstitialAdUnitId, this);
     }
 
     void LoadRewarded()
     {
         _isRewardedLoaded = false;
-        Advertisement.Load(rewardedAdUnitId, this);
+        Advertisement.Load(_rewardedAdUnitId, this);
     }
 
     public void OnUnityAdsAdLoaded(string adUnitId)
     {
         Debug.Log($"[AdsManager] Ad loaded: {adUnitId}");
-        if (adUnitId == rewardedAdUnitId)
+        if (adUnitId == _rewardedAdUnitId)
             _isRewardedLoaded = true;
         else
             _isAdLoaded = true;
@@ -178,12 +193,19 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
 
     // ---- Show ----
 
+    public void OnUnityAdsShowStart(string adUnitId)
+    {
+        IsAdShowing = true;
+        _adShowTimeoutRemaining = adShowTimeout;
+    }
+
     public void OnUnityAdsShowComplete(string adUnitId, UnityAdsShowCompletionState showCompletionState)
     {
         IsAdShowing = false;
+        _adShowTimeoutRemaining = -1f;
         Debug.Log($"[AdsManager] Show complete: {adUnitId} ({showCompletionState})");
 
-        if (adUnitId == rewardedAdUnitId)
+        if (adUnitId == _rewardedAdUnitId)
         {
             LoadRewarded();
             if (showCompletionState == UnityAdsShowCompletionState.COMPLETED)
@@ -202,9 +224,10 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
     public void OnUnityAdsShowFailure(string adUnitId, UnityAdsShowError error, string message)
     {
         IsAdShowing = false;
+        _adShowTimeoutRemaining = -1f;
         Debug.LogWarning($"[AdsManager] Show failed: {adUnitId} - {message}");
 
-        if (adUnitId == rewardedAdUnitId)
+        if (adUnitId == _rewardedAdUnitId)
         {
             LoadRewarded();
             _onRewardedFailed?.Invoke();
@@ -217,6 +240,5 @@ public class AdsManager : MonoBehaviour, IUnityAdsInitializationListener, IUnity
         }
     }
 
-    public void OnUnityAdsShowStart(string adUnitId)  { IsAdShowing = true; }
-    public void OnUnityAdsShowClick(string adUnitId)  { }
+    public void OnUnityAdsShowClick(string adUnitId) { }
 }

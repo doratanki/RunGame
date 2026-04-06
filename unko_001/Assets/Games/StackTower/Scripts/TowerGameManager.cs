@@ -4,9 +4,10 @@ using UnityEngine.SceneManagement;
 /// <summary>
 /// Singleton that manages game state and score for Stack Tower.
 /// </summary>
-public class TowerGameManager : MonoBehaviour
+public class TowerGameManager : Singleton<TowerGameManager>
 {
-    public static TowerGameManager Instance { get; private set; }
+    [Header("Config")]
+    public GameConfig gameConfig;
 
     [Header("References")]
     public BlockSpawner blockSpawner;
@@ -24,14 +25,6 @@ public class TowerGameManager : MonoBehaviour
     public bool HasContinued { get; private set; } = false;
 
     private const string BestScoreKey = "TexasMeatTower_BestScore";
-
-    void Awake()
-    {
-        if (Instance == null)
-            Instance = this;
-        else
-            Destroy(gameObject);
-    }
 
     void Start()
     {
@@ -69,7 +62,8 @@ public class TowerGameManager : MonoBehaviour
         else
             ComboCount = 0;
 
-        int bonus = quality == PlacementQuality.Perfect ? Mathf.Min(ComboCount, 5) : 0;
+        int comboCap = gameConfig != null ? gameConfig.maxComboCap : 5;
+        int bonus = quality == PlacementQuality.Perfect ? Mathf.Min(ComboCount, comboCap) : 0;
         Score += 1 + bonus;
 
         if (quality == PlacementQuality.Perfect)
@@ -94,8 +88,9 @@ public class TowerGameManager : MonoBehaviour
         TowerAudioManager.Instance?.PlayGameOver();
         blockSpawner?.StopSpawning();
 
-        // Show continue dialog with 30% chance if not already used
-        if (!HasContinued && Random.value < 0.3f)
+        // Show continue dialog with configurable chance if not already used
+        float continueChance = gameConfig != null ? gameConfig.continueChance : 0.3f;
+        if (!HasContinued && Random.value < continueChance)
         {
             towerUI?.ShowContinueDialog();
             return;
@@ -127,15 +122,40 @@ public class TowerGameManager : MonoBehaviour
 
     void ShowResult()
     {
-        int best = PlayerPrefs.GetInt(BestScoreKey, 0);
+        int best = LoadBestScore();
         if (Score > best)
         {
             best = Score;
-            PlayerPrefs.SetInt(BestScoreKey, best);
-            PlayerPrefs.Save();
+            SaveBestScore(best);
         }
 
         towerUI?.ShowGameOver(Score, best, PerfectCount, MaxCombo);
+    }
+
+    static int LoadBestScore()
+    {
+        try
+        {
+            return PlayerPrefs.GetInt(BestScoreKey, 0);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"[TowerGameManager] Failed to load best score: {e.Message}");
+            return 0;
+        }
+    }
+
+    static void SaveBestScore(int score)
+    {
+        try
+        {
+            PlayerPrefs.SetInt(BestScoreKey, score);
+            PlayerPrefs.Save();
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"[TowerGameManager] Failed to save best score: {e.Message}");
+        }
     }
 
     public void RestartGame()

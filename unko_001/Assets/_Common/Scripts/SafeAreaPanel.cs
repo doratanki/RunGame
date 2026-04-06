@@ -19,10 +19,8 @@ public class SafeAreaPanel : MonoBehaviour
 
     void Update()
     {
-#if UNITY_EDITOR
         if (_lastSafeArea != Screen.safeArea)
             Apply();
-#endif
     }
 
     void Apply()

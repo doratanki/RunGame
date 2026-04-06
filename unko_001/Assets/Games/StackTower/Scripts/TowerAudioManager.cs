@@ -6,10 +6,8 @@ using UnityEngine;
 /// Attach to the same GameObject as TowerGameManager.
 /// Assign each AudioClip in the Inspector.
 /// </summary>
-public class TowerAudioManager : MonoBehaviour
+public class TowerAudioManager : Singleton<TowerAudioManager>
 {
-    public static TowerAudioManager Instance { get; private set; }
-
     [Header("BGM")]
     public AudioClip bgmClip;
     [Range(0f, 1f)] public float bgmVolume = 0.6f;
@@ -25,15 +23,10 @@ public class TowerAudioManager : MonoBehaviour
     private AudioSource _bgmSource;
     private AudioSource _seSource;
 
-    void Awake()
+    protected override void Awake()
     {
-        if (Instance == null)
-            Instance = this;
-        else
-        {
-            Destroy(gameObject);
-            return;
-        }
+        base.Awake();
+        if (Instance != this) return;
 
         // AudioSource for BGM
         _bgmSource = gameObject.AddComponent<AudioSource>();

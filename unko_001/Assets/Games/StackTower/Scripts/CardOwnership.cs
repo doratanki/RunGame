@@ -4,19 +4,29 @@ using UnityEngine;
 
 /// <summary>
 /// 所持カード ID の永続管理。PlayerPrefs に JSON で保存する。
+/// 読み込み結果をメモリにキャッシュし、IsOwned() のたびに JSON をパースしない。
 /// </summary>
 public static class CardOwnership
 {
     private const string PrefsKey = "OwnedCardIds";
 
-    public static bool IsOwned(string cardId) => Load().Contains(cardId);
+    private static HashSet<string> _cache;
+
+    static HashSet<string> Cache => _cache ??= Load();
+
+    public static bool IsOwned(string cardId) => Cache.Contains(cardId);
 
     public static void Add(string cardId)
     {
-        var owned = Load();
-        owned.Add(cardId);
-        Save(owned);
+        Cache.Add(cardId);
+        Save(Cache);
     }
+
+    /// <summary>
+    /// Clears the in-memory cache, forcing a reload from PlayerPrefs on next access.
+    /// Call this if PlayerPrefs may have been modified externally.
+    /// </summary>
+    public static void InvalidateCache() => _cache = null;
 
     static HashSet<string> Load()
     {

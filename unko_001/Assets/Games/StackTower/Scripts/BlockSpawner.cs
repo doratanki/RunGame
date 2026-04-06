@@ -36,6 +36,9 @@ public class BlockSpawner : MonoBehaviour
     // Transform of the current block's top face, used by CameraFollow
     [HideInInspector] public Transform topBlockTransform;
 
+    // Debris pool — auto-created at runtime, not exposed in Inspector
+    [HideInInspector] public DebrisPool debrisPool;
+
     private TowerBlock currentBlock;
     private TowerBlock lastPlacedBlock;
     private int colorIndex = 0;
@@ -49,6 +52,13 @@ public class BlockSpawner : MonoBehaviour
 
     // Movement axis for the next block (alternates X → Z → X → ...)
     private MoveAxis _nextAxis = MoveAxis.X;
+
+    void Awake()
+    {
+        // Create and initialize the debris pool at startup
+        debrisPool = gameObject.AddComponent<DebrisPool>();
+        debrisPool.Initialize(meatPrefab);
+    }
 
     public void StartSpawning()
     {
@@ -93,13 +103,32 @@ public class BlockSpawner : MonoBehaviour
         isSpawning = false;
         _useInitialSizeOnce = false;
 
+        // Return all active debris to the pool immediately
+        debrisPool?.ReturnAll();
+
         foreach (var go in _spawnedObjects)
         {
-            if (go != null)
+            if (go == null) continue;
+
+            // Stop physics immediately so debris doesn't collide with the next game's blocks
+            // (Destroy() is deferred to end-of-frame, but physics still runs until then)
+            var rb = go.GetComponent<Rigidbody>();
+            if (rb != null)
             {
-                go.SetActive(false);   // Hide immediately before destroying
-                Object.Destroy(go);
+                rb.linearVelocity  = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
+                rb.isKinematic     = true;
             }
+
+            // Destroy dynamically created materials to prevent memory leaks.
+            // renderer.material (not sharedMaterial) returns the runtime instance we created,
+            // so destroying it is safe and won't affect shared assets.
+            var renderer = go.GetComponent<MeshRenderer>();
+            if (renderer != null)
+                Object.Destroy(renderer.material);
+
+            go.SetActive(false);
+            Object.Destroy(go);
         }
         _spawnedObjects.Clear();
 
@@ -115,20 +144,18 @@ public class BlockSpawner : MonoBehaviour
     {
         if (!isSpawning) return;
         if (currentBlock == null || currentBlock.isDropped) return;
-
-        // Block input while an ad is showing
         if (AdsManager.Instance != null && AdsManager.Instance.IsAdShowing) return;
 
-        // Drop on Space, screen tap, or mouse click
-        bool dropped = false;
-        if (Input.GetKeyDown(KeyCode.Space)) dropped = true;
-        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) dropped = true;
-        if (Input.GetMouseButtonDown(0)) dropped = true;
-
-        if (dropped)
-        {
+        if (GetDropInput())
             currentBlock.Drop();
-        }
+    }
+
+    static bool GetDropInput()
+    {
+        if (Input.GetKeyDown(KeyCode.Space)) return true;
+        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) return true;
+        if (Input.GetMouseButtonDown(0)) return true;
+        return false;
     }
 
     void SpawnFoundation()
@@ -222,6 +249,9 @@ public class BlockSpawner : MonoBehaviour
             ? new Vector3(moveRange, nextBlockY, prevZ)
             : new Vector3(prevX, nextBlockY, moveRange);
 
+        Color blockColor = blockColors[colorIndex % blockColors.Length];
+        colorIndex++;
+
         GameObject go;
         if (meatPrefab != null)
         {
@@ -232,7 +262,6 @@ public class BlockSpawner : MonoBehaviour
         }
         else
         {
-            Color color = blockColors[colorIndex % blockColors.Length];
             go = GameObject.CreatePrimitive(PrimitiveType.Cube);
             go.name = "Block_" + score;
             go.transform.localScale = new Vector3(w, blockHeight, d);
@@ -242,16 +271,15 @@ public class BlockSpawner : MonoBehaviour
             if (shader != null)
             {
                 var mat = new Material(shader);
-                mat.color = color;
+                mat.color = blockColor;
                 go.GetComponent<MeshRenderer>().material = mat;
             }
         }
 
-        colorIndex++;
         _spawnedObjects.Add(go);
 
         TowerBlock block = go.AddComponent<TowerBlock>();
-        block.Initialize(speed, moveRange, Color.white, axis);
+        block.Initialize(speed, moveRange, blockColor, axis);
         block.spawner = this;
         block.previousBlock = lastPlacedBlock;
 

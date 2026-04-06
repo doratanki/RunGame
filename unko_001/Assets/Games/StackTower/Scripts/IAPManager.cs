@@ -14,9 +14,8 @@ using UnityEngine.Purchasing.Extension;
 ///   - iOS  : Register an in-app purchase in App Store Connect and match the ProductId
 ///   - Android : Register an in-app item in Google Play Console and match the ProductId
 /// </summary>
-public class IAPManager : MonoBehaviour, IDetailedStoreListener
+public class IAPManager : Singleton<IAPManager>, IDetailedStoreListener
 {
-    public static IAPManager Instance { get; private set; }
 
     // Use the same Product ID on both App Store and Google Play (must match the store entries)
     public const string ProductIdRemoveAds = "com.yourstudio.stacktower.removeads";
@@ -36,15 +35,10 @@ public class IAPManager : MonoBehaviour, IDetailedStoreListener
 
     // ---- Lifecycle ----
 
-    void Awake()
+    protected override void Awake()
     {
-        if (Instance == null)
-            Instance = this;
-        else
-        {
-            Destroy(gameObject);
-            return;
-        }
+        base.Awake();
+        if (Instance != this) return;
 
         InitializePurchasing();
     }

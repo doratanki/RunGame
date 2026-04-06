@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 /// <summary>
 /// One rank entry. The player receives this rank when their score is >= minScore.
@@ -36,4 +39,20 @@ public class RankTable : ScriptableObject
         new RankEntry { label = "SS",  minScore = 300,  color = new Color(1.0f, 0.5f, 0.0f), animTrigger = "RankSS"  },
         new RankEntry { label = "SSS", minScore = 400,  color = new Color(1.0f, 0.2f, 0.2f), animTrigger = "RankSSS" },
     };
+
+#if UNITY_EDITOR
+    void OnValidate()
+    {
+        for (int i = 1; i < entries.Count; i++)
+        {
+            if (entries[i] != null && entries[i - 1] != null && entries[i].minScore <= entries[i - 1].minScore)
+            {
+                Debug.LogWarning(
+                    $"[RankTable] '{name}': entry [{i}] '{entries[i].label}' (minScore={entries[i].minScore}) " +
+                    $"is not greater than entry [{i - 1}] '{entries[i - 1].label}' (minScore={entries[i - 1].minScore}). " +
+                    "Entries must be sorted in ascending order of minScore.");
+            }
+        }
+    }
+#endif
 }

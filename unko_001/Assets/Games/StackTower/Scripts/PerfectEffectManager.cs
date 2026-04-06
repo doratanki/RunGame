@@ -6,10 +6,8 @@ using UnityEngine.UI;
 /// Manages all effects triggered on a Perfect placement.
 /// Attach to the same GameObject as TowerGameManager and call PlayPerfect().
 /// </summary>
-public class PerfectEffectManager : MonoBehaviour
+public class PerfectEffectManager : Singleton<PerfectEffectManager>
 {
-    public static PerfectEffectManager Instance { get; private set; }
-
     [Header("1. Screen Flash")]
     public Image flashImage;
     public Color flashColor = new Color(1f, 1f, 0.6f, 0.6f);
@@ -28,14 +26,9 @@ public class PerfectEffectManager : MonoBehaviour
     [Header("4. Particle")]
     public ParticleSystem perfectParticle;
 
-    void Awake()
+    protected override void OnDestroy()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
-    }
-
-    void OnDestroy()
-    {
+        base.OnDestroy();
         StopAllCoroutines();
         if (cameraFollow != null)
             cameraFollow.shakeOffset = Vector3.zero;
@@ -76,6 +69,8 @@ public class PerfectEffectManager : MonoBehaviour
     // ---- 2. Camera Shake ----
     IEnumerator ShakeRoutine()
     {
+        if (shakeDuration <= 0f) yield break;
+
         float elapsed = 0f;
         while (elapsed < shakeDuration)
         {

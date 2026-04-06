@@ -77,7 +77,7 @@ public class ResultScreenUI : MonoBehaviour
 
     void OnAnimationComplete(ResultData data)
     {
-        if (lotteryTable == null || cardPool == null || cardLotteryUI == null) return;
+        if (lotteryTable == null || cardPool == null || cardLotteryUI == null || rankTable == null) return;
 
         RankEntry finalRank = RankCalculator.GetRank(rankTable, data.Score);
         if (finalRank == null) return;

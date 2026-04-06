@@ -37,23 +37,15 @@ public class GalleryUI : MonoBehaviour
     [Header("Card Detail Popup")]
     public CardDetailPopup cardDetailPopup;
 
-    bool _built;
-
     public void Show()
     {
         if (panel != null) panel.SetActive(true);
 
-        if (!_built)
-        {
-            BuildCardGrid();
+        // Always rebuild the card grid so ownership changes are reflected correctly.
+        // RankGrid doesn't change at runtime, so only build it once.
+        BuildCardGrid();
+        if (rankGrid != null && rankGrid.childCount == 0)
             BuildRankGrid();
-            _built = true;
-        }
-        else
-        {
-            // Ownership may have changed, so refresh
-            RebuildCardGrid();
-        }
 
         ShowCardTab();
         UpdateOwnedCount();
@@ -82,27 +74,17 @@ public class GalleryUI : MonoBehaviour
 
     void BuildCardGrid()
     {
-        if (cardPool == null || cardCellPrefab == null || cardGrid == null) return;
+        if (cardPool == null || cardPool.cards == null || cardCellPrefab == null || cardGrid == null) return;
+
+        // Clear existing cells first so we always get a clean rebuild
+        foreach (Transform child in cardGrid)
+            Destroy(child.gameObject);
 
         foreach (var data in cardPool.cards)
         {
             if (data == null) continue;
             var cell = Instantiate(cardCellPrefab, cardGrid);
             cell.Setup(data, OnCardTapped);
-        }
-    }
-
-    void RebuildCardGrid()
-    {
-        if (cardGrid == null) return;
-
-        // Update existing cells without recreating them
-        int i = 0;
-        foreach (Transform child in cardGrid)
-        {
-            var cell = child.GetComponent<GalleryCardCell>();
-            if (cell != null && cardPool != null && i < cardPool.cards.Count)
-                cell.Setup(cardPool.cards[i++], OnCardTapped);
         }
     }
 
@@ -128,7 +110,7 @@ public class GalleryUI : MonoBehaviour
 
     void UpdateOwnedCount()
     {
-        if (ownedCountText == null || cardPool == null) return;
+        if (ownedCountText == null || cardPool == null || cardPool.cards == null) return;
 
         int total = cardPool.cards.Count;
         int owned = 0;

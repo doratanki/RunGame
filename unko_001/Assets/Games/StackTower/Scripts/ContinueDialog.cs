@@ -79,7 +79,10 @@ public class ContinueDialog : MonoBehaviour
             },
             onFailed: () =>
             {
-                // Let the player choose again if the ad was skipped or failed
+                // Reset countdown text so stale "0" or "1" isn't shown when restarting
+                if (countdownText != null)
+                    countdownText.text = Mathf.CeilToInt(countdownSeconds).ToString();
+
                 SetButtonsInteractable(true);
                 if (countdownSeconds > 0f)
                     _countdown = StartCoroutine(RunCountdown());

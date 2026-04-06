@@ -12,12 +12,33 @@ public static class CardLottery
     /// </summary>
     public static CardLotteryResult Draw(CardLotteryTable lotteryTable, CardPool pool, string rankLabel)
     {
-        if (lotteryTable == null || pool == null)
+        if (lotteryTable == null)
+        {
+            Debug.LogError("[CardLottery] lotteryTable is null. Check Inspector assignment.");
             return default;
+        }
+        if (pool == null)
+        {
+            Debug.LogError("[CardLottery] cardPool is null. Check Inspector assignment.");
+            return default;
+        }
+        if (string.IsNullOrEmpty(rankLabel))
+        {
+            Debug.LogError("[CardLottery] rankLabel is null or empty.");
+            return default;
+        }
 
         var entry = lotteryTable.GetEntry(rankLabel);
-        if (entry == null || entry.rates.Count == 0)
+        if (entry == null)
+        {
+            Debug.LogError($"[CardLottery] No entry found for rank '{rankLabel}' in lotteryTable.");
             return default;
+        }
+        if (entry.rates.Count == 0)
+        {
+            Debug.LogError($"[CardLottery] Rank '{rankLabel}' has no rarity rates configured.");
+            return default;
+        }
 
         // Determine rarity via weighted random
         CardRarity rarity = PickRarity(entry.rates);
@@ -25,7 +46,10 @@ public static class CardLottery
         // Draw one card from those matching the rarity
         var candidates = pool.GetByRarity(rarity);
         if (candidates.Count == 0)
+        {
+            Debug.LogError($"[CardLottery] No cards of rarity '{rarity}' found in pool.");
             return default;
+        }
 
         CardData drawn = candidates[Random.Range(0, candidates.Count)];
 

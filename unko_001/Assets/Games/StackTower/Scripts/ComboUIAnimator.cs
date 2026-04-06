@@ -14,27 +14,22 @@ public class ComboUIAnimator : MonoBehaviour
     public float displayDuration = 0.6f;
     public float fadeDuration    = 0.4f;
 
+    [Header("Colors")]
+    public Color perfectColor = Color.white;
+    public Color goodColor    = new Color(0.4f, 0.9f, 0.4f);
+    public Color badColor     = new Color(0.9f, 0.4f, 0.4f);
+
     private Coroutine _currentAnim;
 
-    public void PlayPerfect()
-    {
-        if (_currentAnim != null)
-            StopCoroutine(_currentAnim);
-        _currentAnim = StartCoroutine(AnimRoutine(Color.white));
-    }
+    public void PlayPerfect() => Play(perfectColor);
+    public void PlayGood()    => Play(goodColor);
+    public void PlayBad()     => Play(badColor);
 
-    public void PlayGood()
+    void Play(Color color)
     {
         if (_currentAnim != null)
             StopCoroutine(_currentAnim);
-        _currentAnim = StartCoroutine(AnimRoutine(new Color(0.4f, 0.9f, 0.4f)));
-    }
-
-    public void PlayBad()
-    {
-        if (_currentAnim != null)
-            StopCoroutine(_currentAnim);
-        _currentAnim = StartCoroutine(AnimRoutine(new Color(0.9f, 0.4f, 0.4f)));
+        _currentAnim = StartCoroutine(AnimRoutine(color));
     }
 
     IEnumerator AnimRoutine(Color textColor)
